@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIBOSOME // VINTAGE DESIGN SYSTEM</title>
+    
+    <!-- Fuentes: Bangers (Retro/Vintage Title) y JetBrains Mono (Mecanografía ultralegible) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'vintage': ['"Bangers"', 'cursive'],
+                        'mono': ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        'ink-bg': '#1a1818',          // Fondo carbón oscuro (UX Friendly)
+                        'ink-black': '#000000',       // Tinta pura para trazos
+                        'vintage-cream': '#F4E7D3',   // Papel viejo / Base
+                        'vintage-red': '#E32636',     // Mutaciones / Errores / Peligro
+                        'vintage-yellow': '#FFDB58',  // Codón Activo / Foco
+                        'vintage-teal': '#5BC0BE',    // ARNm / Flujo correcto
+                        'vintage-green': '#8FBC8F',   // Aminoácidos / Aciertos
+                        'vintage-purple': '#9370DB',  // Codones STOP
+                        'vintage-gray': '#555555',    // Elementos inactivos/procesados
+                    },
+                    boxShadow: {
+                        'comic': '6px 6px 0px 0px rgba(0,0,0,1)',
+                        'comic-sm': '3px 3px 0px 0px rgba(0,0,0,1)',
+                        'comic-hover': '2px 2px 0px 0px rgba(0,0,0,1)',
+                        'glow-yellow': '0 0 20px rgba(255, 219, 88, 0.4)',
+                        'glow-red': '0 0 20px rgba(227, 38, 54, 0.6)',
+                    },
+                    animation: {
+                        'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                        'conveyor': 'conveyor 2s linear infinite',
+                    },
+                    keyframes: {
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-2px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(4px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-6px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(6px, 0, 0)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                        conveyor: {
+                            '0%': { backgroundPosition: '0px 0px' },
+                            '100%': { backgroundPosition: '40px 0px' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #1a1818;
+            color: #F4E7D3;
+            /* Textura de celuloide antiguo/ruido */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        /* Filtro SVG de tinta rasgada/temblorosa (Rubber Hose Style) */
+        .inky-borders { filter: url(#wobble-ink); }
+
+        /* Trazos dibujados a mano */
+        .hand-drawn-border {
+            border: 4px solid #000;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
+        
+        .hand-drawn-border-light {
+            border: 4px solid #F4E7D3;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
+
+        /* Estilo Cinta de Película / ARNm */
+        .film-strip {
+            background-image: linear-gradient(90deg, #1a1818 50%, transparent 50%), linear-gradient(90deg, #1a1818 50%, transparent 50%);
+            background-size: 20px 6px;
+            background-position: top, bottom;
+            background-repeat: repeat-x;
+            border-top: 8px solid #5BC0BE;
+            border-bottom: 8px solid #5BC0BE;
+        }
+
+        /* Burbujas de Aminoácidos (Aspecto orgánico/tinta) */
+        .amino-bubble {
+            border-radius: 50% 40% 60% 40% / 40% 50% 40% 60%;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; border: 2px solid #1a1818; }
+        ::-webkit-scrollbar-track { background: #1a1818; }
+    </style>
+</head>
+<body class="font-mono antialiased min-h-screen p-4 md:p-8 selection:bg-vintage-yellow selection:text-black">
+
+    <!-- Filtro SVG para bordes rasgados -->
+    <svg width="0" height="0" class="absolute hidden">
+        <defs>
+            <filter id="wobble-ink">
+                <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <main class="max-w-6xl mx-auto space-y-12 pb-20">
+        
+        <!-- HEADER -->
+        <header class="text-center space-y-4 pt-4 border-b-4 border-dashed border-vintage-gray pb-8">
+            <div class="inline-block relative">
+                <!-- Decorative gears -->
+                <div class="absolute -top-8 -left-12 w-16 h-16 border-4 border-black rounded-full bg-vintage-gray animate-spin-slow inky-borders flex items-center justify-center opacity-50 z-0">
+                    <div class="w-8 h-8 border-4 border-black rounded-full"></div>
+                </div>
+                <h1 class="font-vintage text-5xl md:text-7xl tracking-widest text-vintage-yellow uppercase shadow-comic hand-drawn-border inline-block px-10 py-4 bg-ink-bg inky-borders relative z-10 border-vintage-cream">
+                    Ribosome <span class="text-vintage-cream">Blues</span>
+                </h1>
+            </div>
+            <p class="text-vintage-teal font-bold tracking-widest uppercase text-sm">UI/UX Design System // Biological Translation</p>
+        </header>
+
+        <!-- SEC 1: ESTADOS DE CODONES (ARNm) -->
+        <section class="space-y-6">
+            <h2 class="font-vintage text-4xl text-vintage-cream tracking-wider uppercase mb-6 flex items-center gap-4">
+                <span class="w-8 h-8 bg-vintage-teal rounded-full shadow-comic border-2 border-black inline-block"></span>
+                1. El Flujo: Estados de Codones
+            </h2>
+            <p class="text-vintage-gray text-sm mb-4 max-w-2xl">Representación visual de los nucleótidos. Deben ser ultra-legibles. Se utiliza la metáfora de una cinta perforada o rollo de pianola que fluye de 5' a 3'.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <!-- Espera -->
+                <div class="bg-vintage-cream p-4 hand-drawn-border shadow-comic flex flex-col items-center justify-center relative overflow-hidden group">
+                    <span class="text-[10px] text-ink-black font-bold mb-2 uppercase border-b-2 border-black pb-1 w-full text-center">Por Leer (Futuro)</span>
+                    <span class="font-mono text-3xl text-ink-black font-bold tracking-widest mt-2">CGC</span>
+                </div>
+
+                <!-- Activo/Foco -->
+                <div class="bg-vintage-yellow p-4 hand-drawn-border shadow-comic flex flex-col items-center justify-center border-4 border-black relative transform scale-105 z-10">
+                    <span class="text-[10px] text-ink-black font-bold mb-2 uppercase border-b-2 border-black pb-1 w-full text-center">Lectura Actual (Sitio A)</span>
+                    <span class="font-mono text-4xl text-ink-black font-bold tracking-widest mt-2">AUG</span>
+                    <div class="absolute -bottom-2 w-3/4 h-[6px] bg-ink-black animate-pulse-fast"></div>
+                </div>
+
+                <!-- Procesado -->
+                <div class="bg-ink-bg p-4 hand-drawn-border-light flex flex-col items-center justify-center opacity-60">
+                    <span class="text-[10px] text-vintage-gray font-bold mb-2 uppercase border-b-2 border-vintage-gray pb-1 w-full text-center">Traducido (Pasado)</span>
+                    <span class="font-mono text-3xl text-vintage-gray font-bold tracking-widest mt-2">UUC</span>
+                </div>
+
+                <!-- Mutación/Error -->
+                <div class="bg-vintage-red p-4 hand-drawn-border shadow-comic flex flex-col items-center justify-center animate-shake">
+                    <span class="text-[10px] text-vintage-cream font-bold mb-2 uppercase border-b-2 border-black pb-1 w-full text-center">Error (Mutación)</span>
+                    <span class="font-mono text-3xl text-ink-black font-bold tracking-widest mt-2 relative">
+                        G<span class="line-through decoration-4 decoration-black text-vintage-cream">U</span>A
+                        <!-- Mancha de tinta simulada -->
+                        <div class="absolute -top-2 -right-4 w-6 h-6 bg-black rounded-full inky-borders opacity-80"></div>
+                    </span>
+                </div>
+
+                <!-- STOP Codon -->
+                <div class="bg-vintage-purple p-4 hand-drawn-border shadow-comic flex flex-col items-center justify-center">
+                    <span class="text-[10px] text-vintage-cream font-bold mb-2 uppercase border-b-2 border-black pb-1 w-full text-center">Codón STOP</span>
+                    <span class="font-mono text-3xl text-ink-black font-bold tracking-widest mt-2 animate-pulse">UAA</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEC 2: ELEMENTOS ORGÁNICOS Y FEEDBACK -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t-2 border-dashed border-vintage-gray pt-8">
+            
+            <!-- ARNt y Aminoácidos -->
+            <div class="space-y-6">
+                <h2 class="font-vintage text-3xl text-vintage-cream tracking-wider uppercase mb-4">2. Bloques (ARNt / Aminoácidos)</h2>
+                <p class="text-vintage-gray text-sm mb-6">Metáfora: Gotas de tinta vivas (Rubber Hose) que traen los aminoácidos. Cuando se unen correctamente, pierden su "anticodón" y se vuelven perlas de la proteína.</p>
+                
+                <div class="flex gap-6 items-end">
+                    <!-- ARNt Libre -->
+                    <div class="flex flex-col items-center gap-2 animate-float">
+                        <!-- Amino Acid Bubble -->
+                        <div class="w-16 h-16 bg-vintage-green border-4 border-black shadow-comic amino-bubble inky-borders flex items-center justify-center relative">
+                            <!-- Brillo estilo cartoon -->
+                            <div class="absolute top-2 right-3 w-3 h-3 bg-white rounded-full opacity-80"></div>
+                            <span class="font-vintage text-xl text-ink-black">Met</span>
+                        </div>
+                        <!-- Anticodón Base (Conector) -->
+                        <div class="bg-vintage-cream border-4 border-black px-3 py-1 shadow-comic-sm inky-borders transform -rotate-6">
+                            <span class="font-mono text-ink-black font-bold text-sm tracking-widest">UAC</span>
+                        </div>
+                    </div>
+
+                    <!-- ARNt Mutado/Error -->
+                    <div class="flex flex-col items-center gap-2 animate-float" style="animation-delay: 1s;">
+                        <div class="w-16 h-16 bg-vintage-red border-4 border-black shadow-comic amino-bubble inky-borders flex items-center justify-center relative">
+                            <!-- Ojo Muerto (X) Cartoon -->
+                            <span class="font-bangers text-black text-2xl">X_X</span>
+                        </div>
+                        <div class="bg-black border-2 border-vintage-red px-3 py-1 shadow-comic-sm inky-borders transform rotate-6">
+                            <span class="font-mono text-vintage-red font-bold text-sm tracking-widest">ERR</span>
+                        </div>
+                    </div>
+
+                    <!-- Proteína ya formada (Perlas unidas) -->
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-vintage-teal border-4 border-black rounded-full shadow-comic flex items-center justify-center relative z-10">
+                            <span class="font-vintage text-sm text-ink-black">Val</span>
+                        </div>
+                        <div class="w-6 h-3 bg-black -mx-1 z-0"></div> <!-- Enlace peptídico -->
+                        <div class="w-12 h-12 bg-vintage-yellow border-4 border-black rounded-full shadow-comic flex items-center justify-center relative z-10">
+                            <span class="font-vintage text-sm text-ink-black">Ala</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback y Onomatopeyas -->
+            <div class="space-y-6">
+                <h2 class="font-vintage text-3xl text-vintage-cream tracking-wider uppercase mb-4">3. Feedback Visual (FX)</h2>
+                <p class="text-vintage-gray text-sm mb-6">Impactos visuales al teclear. Se utilizan burbujas explosivas tipo cómic de los años 30 para aciertos y errores.</p>
+                
+                <div class="grid grid-cols-2 gap-4 h-full">
+                    <!-- Acierto -->
+                    <div class="relative flex items-center justify-center p-4 border-2 border-dashed border-vintage-gray">
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMTAgNTBMMyAyMEwyNSA0MEw0MCAxMEw1MCA0MEw3NSAyMEw2NSA1MEw5MCA3MEw2MCA2MEw1MCA5MEw0MCA2MEwxMCA3MHoiIGZpbGw9IiM1QkMwQkUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PC9zdmc+')] bg-no-repeat bg-center bg-contain opacity-80 animate-pulse-fast"></div>
+                        <span class="font-vintage text-3xl text-ink-black relative z-10 transform -rotate-12 drop-shadow-[2px_2px_0_#fff]">¡CLACK!</span>
+                    </div>
+                    <!-- Error / Timeout -->
+                    <div class="relative flex items-center justify-center p-4 border-2 border-dashed border-vintage-gray">
+                         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMTAgNTBMMCAzMEwzMCA0MEw0MCAwTDUwIDQwTDgwIDIwTDcwIDUwTTEwMCA3MEw2MCA2MEw1MCAxMDBMNDAgNjBMMCA3MHoiIGZpbGw9IiNFMzI2MzYiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PC9zdmc+')] bg-no-repeat bg-center bg-contain opacity-80 animate-shake"></div>
+                        <span class="font-vintage text-4xl text-ink-black relative z-10 transform rotate-12 drop-shadow-[2px_2px_0_#FFDB58]">¡ZAP!</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEC 3: INTERFAZ HUD & MÉTRICAS -->
+        <section class="space-y-6 border-t-2 border-dashed border-vintage-gray pt-8">
+            <h2 class="font-vintage text-3xl text-vintage-cream tracking-wider uppercase mb-6">4. HUD: Medidores Biológicos</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Fidelidad -->
+                <div class="bg-ink-bg border-4 border-vintage-cream p-4 hand-drawn-border inky-borders relative">
+                    <p class="font-vintage text-vintage-cream tracking-widest text-xl mb-2 text-center">Fidelidad de Traducción</p>
+                    <div class="h-6 w-full bg-ink-black border-2 border-black rounded-full overflow-hidden relative shadow-[inset_0_4px_4px_rgba(0,0,0,0.5)]">
+                        <!-- Barra segmentada -->
+                        <div class="h-full bg-vintage-green w-[85%] border-r-4 border-black" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);"></div>
+                    </div>
+                    <p class="text-right font-mono font-bold text-vintage-green mt-1 text-sm">85%</p>
+                </div>
+
+                <!-- Temporizador (Degradación) -->
+                <div class="bg-ink-bg border-4 border-vintage-cream p-4 hand-drawn-border inky-borders flex flex-col items-center">
+                    <p class="font-vintage text-vintage-yellow tracking-widest text-xl mb-2">Tiempo de Enlace</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full border-4 border-vintage-yellow flex items-center justify-center animate-pulse">
+                            <div class="w-3 h-3 bg-vintage-yellow rounded-full"></div>
+                        </div>
+                        <span class="font-mono text-3xl font-bold text-vintage-cream">01.4s</span>
+                    </div>
+                </div>
+
+                <!-- Errores / Cadena -->
+                <div class="bg-ink-bg border-4 border-vintage-cream p-4 hand-drawn-border inky-borders flex justify-around items-center">
+                    <div class="text-center">
+                        <p class="font-vintage text-vintage-gray tracking-widest text-lg">Mutaciones</p>
+                        <p class="font-mono text-4xl font-bold text-vintage-red drop-shadow-glow-red">03</p>
+                    </div>
+                    <div class="w-1 h-12 bg-vintage-gray border-l-2 border-black"></div>
+                    <div class="text-center">
+                        <p class="font-vintage text-vintage-gray tracking-widest text-lg">Longitud</p>
+                        <p class="font-mono text-4xl font-bold text-vintage-teal">12<span class="text-sm">aa</span></p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SEC 4: MOCKUP INTEGRADO (THE GAME SCREEN) -->
+        <section class="space-y-6 border-t-2 border-dashed border-vintage-gray pt-8 pb-12">
+            <h2 class="font-vintage text-4xl text-vintage-cream tracking-wider uppercase mb-6 text-center">5. Escenario de Juego (Layout)</h2>
+            
+            <!-- EL RIBOSOMA (Máquina central) -->
+            <div class="relative w-full max-w-5xl mx-auto bg-ink-bg border-4 border-vintage-gray p-8 md:p-12 rounded-[40px] inky-borders flex flex-col items-center min-h-[500px] overflow-hidden shadow-comic">
+                
+                <!-- Background decor (engranajes oscuros) -->
+                <div class="absolute -right-16 -top-16 w-64 h-64 border-[12px] border-dashed border-black rounded-full opacity-20 animate-spin-slow pointer-events-none"></div>
+                <div class="absolute -left-16 bottom-0 w-48 h-48 border-[8px] border-dashed border-black rounded-full opacity-20 animate-spin-slow pointer-events-none" style="animation-direction: reverse;"></div>
+
+                <!-- 1. PROTEÍNA SALIENDO HACIA ARRIBA -->
+                <div class="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center z-20">
+                    <span class="font-vintage text-vintage-gray text-xs uppercase tracking-widest mb-2">Producto Péptido</span>
+                    <div class="flex flex-col-reverse items-center">
+                        <!-- Perla más vieja -->
+                        <div class="w-10 h-10 bg-vintage-cream border-4 border-black rounded-full flex items-center justify-center opacity-40 shadow-comic-sm"></div>
+                        <div class="w-2 h-4 bg-black"></div>
+                        <!-- Perla media -->
+                        <div class="w-12 h-12 bg-vintage-teal border-4 border-black rounded-full shadow-comic-sm flex items-center justify-center relative z-10">
+                             <span class="font-vintage text-ink-black text-xs">His</span>
+                        </div>
+                        <div class="w-2 h-4 bg-black"></div>
+                        <!-- Perla recién añadida (Sitio P) -->
+                        <div class="w-14 h-14 bg-vintage-green border-4 border-black rounded-full shadow-comic-sm flex items-center justify-center relative z-10">
+                            <span class="font-vintage text-ink-black text-lg">Leu</span>
+                            <!-- Sombra interior para darle volumen 3D cartoon -->
+                            <div class="absolute inset-0 rounded-full shadow-[inset_-4px_-4px_0_rgba(0,0,0,0.2)] pointer-events-none"></div>
+                        </div>
+                        <!-- Tubo de salida del ribosoma -->
+                        <div class="w-16 h-8 bg-ink-black border-4 border-vintage-gray rounded-t-lg mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- 2. LA MÁQUINA RIBOSÓMICA (Centro) -->
+                <div class="w-full max-w-2xl mt-48 relative z-10 bg-vintage-gray border-4 border-black p-4 rounded-[30px] hand-drawn-border inky-borders shadow-[0_15px_0_0_#000]">
+                    
+                    <!-- Sitios E, P, A pintados en la máquina -->
+                    <div class="absolute -top-8 left-0 w-full flex justify-around px-16 font-vintage text-2xl text-vintage-gray">
+                        <span>E (Exit)</span>
+                        <span class="text-vintage-cream">P (Peptide)</span>
+                        <span class="text-vintage-yellow animate-pulse">A (Active)</span>
+                    </div>
+
+                    <!-- 3. CINTA DE ARNm FLUYENDO (De derecha a izquierda) -->
+                    <div class="w-full bg-vintage-teal film-strip px-4 py-6 border-y-4 border-black shadow-[inset_0_10px_20px_rgba(0,0,0,0.5)] relative flex items-center justify-center gap-4 overflow-hidden">
+                        
+                        <!-- Overlay de escaneo en el Sitio A -->
+                        <div class="absolute left-1/2 top-0 bottom-0 w-32 -translate-x-1/2 bg-vintage-yellow opacity-20 border-x-4 border-vintage-yellow pointer-events-none z-20 mix-blend-overlay"></div>
+
+                        <div class="flex gap-4 font-mono font-bold text-4xl tracking-widest items-center z-10">
+                            <!-- Sale del ribosoma (Pasado) -->
+                            <div class="bg-ink-bg border-4 border-black px-4 py-2 opacity-50 shadow-comic-sm transform -rotate-3 text-vintage-gray">GCC</div>
+                            
+                            <!-- Sitio P (Recién leído) -->
+                            <div class="bg-vintage-cream border-4 border-black px-4 py-2 shadow-comic-sm transform rotate-2 text-ink-black relative">
+                                UAG
+                                <!-- Conector ARNt enganchado -->
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 w-8 h-8 bg-black"></div>
+                            </div>
+                            
+                            <!-- SITIO A (FOCO ACTUAL) -->
+                            <div class="bg-vintage-yellow border-4 border-black px-6 py-4 shadow-[0_0_30px_rgba(255,219,88,0.8)] transform scale-110 relative z-30 text-ink-black flex flex-col items-center">
+                                C<span class="relative">A<div class="absolute -bottom-2 w-full h-1 bg-black animate-pulse-fast"></div></span>A
+                            </div>
+
+                            <!-- Codones entrantes -->
+                            <div class="bg-vintage-cream border-4 border-black px-4 py-2 shadow-comic-sm text-ink-black opacity-90">GGU</div>
+                            <div class="bg-vintage-cream border-4 border-black px-4 py-2 shadow-comic-sm text-ink-black opacity-70">UGA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input prompt para el jugador -->
+                <div class="mt-12 text-center space-y-2 z-10">
+                    <p class="font-vintage text-vintage-cream tracking-widest text-2xl animate-float">Type the Anticodon!</p>
+                    <div class="inline-flex bg-ink-black border-4 border-vintage-gray hand-drawn-border px-8 py-4">
+                        <span class="font-mono text-3xl font-bold text-vintage-yellow tracking-widest">G <span class="text-vintage-gray">_ _</span></span>
+                    </div>
+                </div>
+
+            </div>
+            
+            <p class="text-center text-vintage-gray text-xs font-mono max-w-2xl mx-auto mt-4">
+                * Regla UX: El ARNm siempre mantiene alto contraste (negro sobre amarillo/crema). El área "A" (Active) es el foco visual más brillante de la pantalla. Los errores generan un pantallazo rojo sutil en el fondo (`bg-ink-bg`).
+            </p>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
