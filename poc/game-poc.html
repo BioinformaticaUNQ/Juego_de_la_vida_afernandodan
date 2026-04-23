@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ribosoma: Ahorcado de Traducción</title>
+    <style>
+        :root {
+            --bg-color: #fdece8;
+            --ribosome-color: #6cc4ba;
+            --ribosome-dark: #58a59c;
+            --mrna-color: #3699a4;
+            --mrna-base-color: #f1c40f;
+            --text-dark: #2c3e50;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
+            --codon-width: 90px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            width: 100%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        h1 { margin: 0 0 5px 0; color: #e67e22; }
+        
+        #hud {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        #game-area {
+            position: relative;
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Cadena de Proteína creciendo hacia arriba */
+        #protein-container {
+            position: absolute;
+            top: 50px;
+            height: 250px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            justify-content: flex-start;
+            z-index: 10;
+        }
+
+        .amino-acid-bead {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.7em;
+            text-align: center;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3), 0 3px 5px rgba(0,0,0,0.2);
+            margin-bottom: 5px;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative;
+        }
+
+        /* Enlace peptídico */
+        .amino-acid-bead:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            width: 4px;
+            height: 8px;
+            background: #555;
+            z-index: -1;
+        }
+
+        /* Ribosoma */
+        #ribosome {
+            position: relative;
+            width: 320px;
+            height: 220px;
+            background: var(--ribosome-color);
+            border-radius: 160px 160px 80px 80px;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 20px;
+            z-index: 20;
+        }
+
+        #ribosome::before {
+            content: 'Ribosoma';
+            position: absolute;
+            top: 20px;
+            color: rgba(255,255,255,0.7);
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* Input y Hint (Ahorcado) */
+        #interaction-zone {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 15px;
+            width: 80%;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        #hint-display {
+            font-size: 1.5em;
+            letter-spacing: 3px;
+            font-family: monospace;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            min-height: 35px;
+        }
+
+        #aa-input {
+            width: 90%;
+            padding: 10px;
+            font-size: 1.2em;
+            border: 2px solid var(--ribosome-dark);
+            border-radius: 8px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #aa-input:focus {
+            border-color: #e67e22;
+        }
+
+        .shake {
+            animation: shakeError 0.4s;
+            border-color: var(--error-color) !important;
+        }
+
+        /* Pista de ARNm */
+        #mrna-window {
+            position: absolute;
+            bottom: -30px;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 25;
+            overflow: hidden;
+        }
+
+        #mrna-strand {
+            display: flex;
+            height: 20px;
+            background: var(--mrna-color);
+            align-items: center;
+            position: relative;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .codon-block {
+            width: var(--codon-width);
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        /* "Palitos" de las bases nitrogenadas */
+        .codon-block::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 15px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                var(--mrna-base-color) 10px,
+                var(--mrna-base-color) 14px
+            );
+        }
+
+        /* Barra de Tiempo */
+        #timer-container {
+            width: 300px;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        #timer-bar {
+            height: 100%;
+            width: 100%;
+            background: #2ecc71;
+            transition: width 0.1s linear, background-color 0.3s;
+        }
+
+        /* Pantallas superpuestas */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .hidden { display: none !important; }
+
+        button.start-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.2s;
+            margin-top: 20px;
+        }
+
+        button.start-btn:hover { transform: scale(1.05); background: #d35400; }
+
+        @keyframes popIn {
+            0% { transform: scale(0) translateY(20px); opacity: 0; }
+            80% { transform: scale(1.1) translateY(0); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes shakeError {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Traducción: Modo Ahorcado Progresivo</h1>
+        <div id="hud">
+            <div>Nivel: <span id="level-display">1</span></div>
+            <div>Vidas: <span id="lives-display">❤️❤️❤️</span></div>
+            <div>Puntaje: <span id="score-display">0</span></div>
+        </div>
+    </header>
+
+    <div id="game-area">
+        
+        <div id="protein-container">
+            <!-- Los aminoácidos crecerán aquí -->
+        </div>
+
+        <div id="ribosome">
+            <div id="interaction-zone">
+                <div id="hint-display">_ _ _ _</div>
+                <input type="text" id="aa-input" placeholder="Escribe el aminoácido" autocomplete="off" disabled>
+            </div>
+            
+            <div id="mrna-window">
+                <div id="mrna-strand">
+                    <!-- Los codones se inyectan aquí -->
+                </div>
+            </div>
+        </div>
+
+        <div id="timer-container">
+            <div id="timer-bar"></div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Inicio -->
+    <div id="start-screen" class="overlay">
+        <h2 style="font-size: 2.5em; color: #6cc4ba; margin-bottom: 10px;">¡Sintetiza la Proteína!</h2>
+        <p style="max-width: 600px; text-align: center; font-size: 1.2em; line-height: 1.5;">
+            El ARNm avanzará a través del ribosoma.<br>
+            Aparecerá el nombre del aminoácido incompleto (como un ahorcado).<br><br>
+            <strong>Tu objetivo:</strong> Escribir el nombre completo del aminoácido en la caja de texto y presionar ENTER antes de que se acabe el tiempo.<br>
+            <em>Nota: No te preocupes por las tildes o mayúsculas.</em>
+        </p>
+        <p style="color: #f1c40f;">¡A mayor nivel, menos letras de pista y menos tiempo!</p>
+        <button class="start-btn" onclick="startGame()">Comenzar Traducción</button>
+    </div>
+
+    <!-- Pantalla Final -->
+    <div id="game-over-screen" class="overlay hidden">
+        <h2 id="end-title" style="font-size: 3em; margin-bottom: 10px;">¡Juego Terminado!</h2>
+        <p id="end-reason" style="font-size: 1.2em; margin-bottom: 20px;"></p>
+        <h3>Puntaje Final: <span id="final-score" style="color: #2ecc71;">0</span></h3>
+        <p>Longitud de la cadena: <span id="final-length">0</span> aminoácidos</p>
+        <button class="start-btn" onclick="location.reload()">Jugar de Nuevo</button>
+    </div>
+
+<script>
+    // Diccionario de codones a Aminoácidos (Nombres sin abreviatura para tipear fácil)
+    const geneticCode = {
+        'AUG': 'Metionina', 'UUU': 'Fenilalanina', 'UUC': 'Fenilalanina',
+        'UUA': 'Leucina', 'UUG': 'Leucina', 'CUU': 'Leucina', 'CUC': 'Leucina', 'CUA': 'Leucina', 'CUG': 'Leucina',
+        'AUU': 'Isoleucina', 'AUC': 'Isoleucina', 'AUA': 'Isoleucina',
+        'GUU': 'Valina', 'GUC': 'Valina', 'GUA': 'Valina', 'GUG': 'Valina',
+        'UCU': 'Serina', 'UCC': 'Serina', 'UCA': 'Serina', 'UCG': 'Serina', 'AGU': 'Serina', 'AGC': 'Serina',
+        'CCU': 'Prolina', 'CCC': 'Prolina', 'CCA': 'Prolina', 'CCG': 'Prolina',
+        'ACU': 'Treonina', 'ACC': 'Treonina', 'ACA': 'Treonina', 'ACG': 'Treonina',
+        'GCU': 'Alanina', 'GCC': 'Alanina', 'GCA': 'Alanina', 'GCG': 'Alanina',
+        'UAU': 'Tirosina', 'UAC': 'Tirosina',
+        'CAU': 'Histidina', 'CAC': 'Histidina',
+        'CAA': 'Glutamina', 'CAG': 'Glutamina',
+        'AAU': 'Asparagina', 'AAC': 'Asparagina',
+        'AAA': 'Lisina', 'AAG': 'Lisina',
+        'GAU': 'Acido Aspartico', 'GAC': 'Acido Aspartico', // Sin tilde para facilitar
+        'GAA': 'Acido Glutamico', 'GAG': 'Acido Glutamico',
+        'UGU': 'Cisteina', 'UGC': 'Cisteina',
+        'UGG': 'Triptofano',
+        'CGU': 'Arginina', 'CGC': 'Arginina', 'CGA': 'Arginina', 'CGG': 'Arginina', 'AGA': 'Arginina', 'AGG': 'Arginina',
+        'GGU': 'Glicina', 'GGC': 'Glicina', 'GGA': 'Glicina', 'GGG': 'Glicina'
+    };
+    
+    // Generador de colores aleatorios para la proteína visual
+    const colors = ['#e74c3c', '#9b59b6', '#3498db', '#e67e22', '#f1c40f', '#1abc9c', '#34495e'];
+
+    let sequence = [];
+    let currentIndex = 0;
+    let score = 0;
+    let lives = 3;
+    let level = 1;
+    let currentTargetAA = "";
+    
+    // Temporizador
+    let timerInterval;
+    let timeLeft;
+    let maxTime;
+
+    const inputField = document.getElementById('aa-input');
+    const mrnaStrand = document.getElementById('mrna-strand');
+    const hintDisplay = document.getElementById('hint-display');
+    const timerBar = document.getElementById('timer-bar');
+
+    // Normalizar texto (quita tildes y pasa a minúsculas)
+    function normalizeText(text) {
+        return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+
+    // Generar secuencia de juego (Larga para que la dificultad pueda escalar)
+    function generateSequence(length = 20) {
+        let seq = ['AUG']; // Inicia con Metionina
+        const codons = Object.keys(geneticCode);
+        for(let i=0; i<length-1; i++) {
+            seq.push(codons[Math.floor(Math.random() * codons.length)]);
+        }
+        return seq;
+    }
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        sequence = generateSequence(25);
+        currentIndex = 0;
+        score = 0;
+        lives = 3;
+        
+        // Dibujar ARNm visual
+        mrnaStrand.innerHTML = '';
+        // Espaciadores iniciales para que el primer codón quede en el centro
+        mrnaStrand.innerHTML += `<div class="codon-block"></div><div class="codon-block"></div>`;
+        sequence.forEach(codon => {
+            mrnaStrand.innerHTML += `<div class="codon-block">${codon}</div>`;
+        });
+        // Espaciadores finales
+        mrnaStrand.innerHTML += `<div class="codon-block"></div><div class="codon-block"></div>`;
+
+        inputField.disabled = false;
+        inputField.focus();
+        
+        updateHUD();
+        loadNextCodon();
+    }
+
+    function loadNextCodon() {
+        if (currentIndex >= sequence.length) {
+            endGame(true);
+            return;
+        }
+
+        inputField.value = '';
+        inputField.focus();
+
+        const currentCodon = sequence[currentIndex];
+        currentTargetAA = geneticCode[currentCodon];
+        
+        // Calcular Nivel y Dificultad
+        level = Math.floor(currentIndex / 4) + 1;
+        document.getElementById('level-display').textContent = level;
+
+        // Animar desplazamiento del ARNm hacia la izquierda
+        // Cada bloque mide 90px (definido en CSS --codon-width)
+        const offset = -(currentIndex * 90); 
+        mrnaStrand.style.transform = `translateX(${offset}px)`;
+
+        // Generar Pista ("Ahorcado")
+        generateHint(currentTargetAA, level);
+
+        // Configurar Tiempo (A mayor nivel, menos tiempo. Mínimo 5 segundos)
+        maxTime = Math.max(15000 - (level * 2000), 5000); 
+        startTimer(maxTime);
+    }
+
+    function generateHint(word, currentLevel) {
+        let chars = word.split('');
+        let hiddenCount = 0;
+        
+        // Lógica de dificultad para ocultar letras
+        if (currentLevel === 1) hiddenCount = Math.floor(chars.length * 0.2); // Oculta 20%
+        else if (currentLevel === 2) hiddenCount = Math.floor(chars.length * 0.4); // Oculta 40%
+        else if (currentLevel === 3) hiddenCount = Math.floor(chars.length * 0.6); // Oculta 60%
+        else if (currentLevel === 4) hiddenCount = Math.floor(chars.length * 0.8); // Oculta 80%
+        else hiddenCount = chars.length; // Oculta 100% (Modo Experto)
+
+        // Prevenir ocultar espacios en blanco (si hay como en Ácido Aspártico)
+        let indicesToHide = [];
+        while(indicesToHide.length < hiddenCount) {
+            let rand = Math.floor(Math.random() * chars.length);
+            if (chars[rand] !== ' ' && !indicesToHide.includes(rand)) {
+                indicesToHide.push(rand);
+            }
+            // Salvaguarda si intenta ocultar más de lo posible
+            if(indicesToHide.length >= chars.filter(c => c !== ' ').length) break;
+        }
+
+        indicesToHide.forEach(index => {
+            chars[index] = '_';
+        });
+
+        hintDisplay.textContent = chars.join(' ');
+    }
+
+    function startTimer(duration) {
+        clearInterval(timerInterval);
+        timeLeft = duration;
+        timerBar.style.width = '100%';
+        timerBar.style.backgroundColor = '#2ecc71';
+
+        timerInterval = setInterval(() => {
+            timeLeft -= 50;
+            const percentage = (timeLeft / duration) * 100;
+            timerBar.style.width = `${percentage}%`;
+
+            if (percentage < 40) timerBar.style.backgroundColor = '#f1c40f';
+            if (percentage < 15) timerBar.style.backgroundColor = '#e74c3c';
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleMistake("¡Se acabó el tiempo!");
+            }
+        }, 50);
+    }
+
+    // Escuchar el ENTER en el input
+    inputField.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const userInput = normalizeText(inputField.value);
+            const targetNorm = normalizeText(currentTargetAA);
+
+            if (userInput === targetNorm) {
+                handleSuccess();
+            } else {
+                inputField.classList.add('shake');
+                setTimeout(() => inputField.classList.remove('shake'), 400);
+                inputField.value = ''; // Limpiar para reintento rápido
+            }
+        }
+    });
+
+    function handleSuccess() {
+        clearInterval(timerInterval);
+        
+        // Sumar puntos (más puntos si se responde rápido)
+        const timeBonus = Math.floor((timeLeft / maxTime) * 100);
+        score += (100 * level) + timeBonus;
+        updateHUD();
+
+        // Crear la bolita del aminoácido (Proteína resultante avanza hacia arriba)
+        const bead = document.createElement('div');
+        bead.className = 'amino-acid-bead';
+        bead.style.backgroundColor = colors[currentIndex % colors.length];
+        // Mostrar las primeras 3 letras del aminoácido real
+        bead.textContent = currentTargetAA.substring(0,3).toUpperCase();
+        document.getElementById('protein-container').appendChild(bead);
+
+        currentIndex++;
+        setTimeout(loadNextCodon, 400); // Pequeña pausa visual antes de mover el ARNm
+    }
+
+    function handleMistake(reason) {
+        lives--;
+        updateHUD();
+        inputField.value = '';
+
+        if (lives <= 0) {
+            endGame(false, reason);
+        } else {
+            // Mostrar la respuesta correcta brevemente y pasar al siguiente
+            hintDisplay.textContent = currentTargetAA.split('').join(' ');
+            hintDisplay.style.color = 'var(--error-color)';
+            
+            // Añadir una bolita de "Error" (gris)
+            const errorBead = document.createElement('div');
+            errorBead.className = 'amino-acid-bead';
+            errorBead.style.backgroundColor = '#7f8c8d';
+            errorBead.textContent = 'ERR';
+            document.getElementById('protein-container').appendChild(errorBead);
+
+            setTimeout(() => {
+                hintDisplay.style.color = 'var(--text-dark)';
+                currentIndex++;
+                loadNextCodon();
+            }, 1500);
+        }
+    }
+
+    function updateHUD() {
+        document.getElementById('score-display').textContent = score;
+        let hearts = '';
+        for(let i=0; i<lives; i++) hearts += '❤️';
+        document.getElementById('lives-display').textContent = hearts || '💀';
+    }
+
+    function endGame(victory = false, reason = "") {
+        clearInterval(timerInterval);
+        inputField.disabled = true;
+        
+        const screen = document.getElementById('game-over-screen');
+        screen.classList.remove('hidden');
+        
+        document.getElementById('final-score').textContent = score;
+        document.getElementById('final-length').textContent = currentIndex;
+        
+        const title = document.getElementById('end-title');
+        const reasonEl = document.getElementById('end-reason');
+
+        if (victory) {
+            title.textContent = "¡Proteína Completada!";
+            title.style.color = "#2ecc71";
+            reasonEl.textContent = "Has traducido con éxito la cadena completa de ARNm.";
+        } else {
+            title.textContent = "Mutación Fatal (Game Over)";
+            title.style.color = "#e74c3c";
+            reasonEl.textContent = reason || "Demasiados errores de traducción.";
+        }
+    }
+
+    // Mantener siempre el foco en el input al hacer clic en cualquier parte del juego
+    document.getElementById('game-area').addEventListener('click', () => {
+        if(!inputField.disabled) inputField.focus();
+    });
+</script>
+</body>
+</html>

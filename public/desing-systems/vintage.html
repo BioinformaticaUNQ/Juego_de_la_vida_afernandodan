@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INK & KEYS // DESIGN SYSTEM</title>
+    
+    <!-- Fuentes: Bangers (Retro/Vintage Title) y JetBrains Mono (Mecanografía ultralegible) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'vintage': ['"Bangers"', 'cursive'],
+                        'mono': ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        'ink-black': '#111111',       // Fondo oscuro para la vista
+                        'ink-darker': '#0a0a0a',      // Fondo absoluto
+                        'vintage-cream': '#F4E7D3',   // Letras por escribir / UI neutra
+                        'vintage-red': '#E32636',     // Errores / Peligro
+                        'vintage-yellow': '#FFDB58',  // Letra actual / Foco
+                        'vintage-teal': '#5BC0BE',    // Aciertos / Combo
+                        'vintage-gray': '#555555',    // Texto ya escrito
+                    },
+                    boxShadow: {
+                        'comic': '4px 4px 0px 0px rgba(0,0,0,1)',
+                        'glow-yellow': '0 0 15px rgba(255, 219, 88, 0.6)',
+                        'glow-red': '0 0 15px rgba(227, 38, 54, 0.8)',
+                    },
+                    animation: {
+                        'cursor-blink': 'blink 1s step-end infinite',
+                        'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        blink: {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: 0 },
+                        },
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-2px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(4px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-6px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(6px, 0, 0)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #111111;
+            color: #F4E7D3;
+            /* Textura de papel antiguo/ruido muy sutil para el fondo oscuro */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* EL SECRETO DEL ESTILO 1930s: Filtro SVG de tinta rasgada/temblorosa.
+           Se aplica a la UI, pero NUNCA al texto jugable para mantener la legibilidad.
+        */
+        .inky-borders {
+            filter: url(#wobble-ink);
+        }
+
+        /* Estilo de línea dibujada a mano */
+        .hand-drawn-border {
+            border: 4px solid #F4E7D3;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
+        
+        .hand-drawn-border-dark {
+            border: 4px solid #000;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
+
+        /* Scrollbar minimalista y oscura */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: #111; }
+    </style>
+</head>
+<body class="font-mono antialiased min-h-screen p-4 md:p-8 selection:bg-vintage-yellow selection:text-black">
+
+    <!-- SVG Definitions for Ink Effects -->
+    <svg width="0" height="0" class="absolute hidden">
+        <defs>
+            <!-- Filtro para bordes rasgados/temblorosos como tinta -->
+            <filter id="wobble-ink">
+                <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- Contenedor Principal -->
+    <main class="max-w-5xl mx-auto space-y-12">
+        
+        <!-- HEADER SYSTEM -->
+        <header class="text-center space-y-4 pt-4">
+            <h1 class="font-vintage text-6xl md:text-8xl tracking-widest text-vintage-cream uppercase drop-shadow-[4px_4px_0_rgba(0,0,0,1)] hand-drawn-border inline-block px-8 py-4 bg-vintage-red inky-borders">
+                Ink & Keys
+            </h1>
+            <p class="text-vintage-gray font-bold tracking-widest uppercase text-sm">Design System // Speed Typing Arcade</p>
+        </header>
+
+        <!-- SECCIÓN 1: PALETA Y TIPOGRAFÍA -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t-2 border-dashed border-vintage-gray pt-8">
+            
+            <!-- Tipografía -->
+            <div class="space-y-6">
+                <h2 class="font-vintage text-3xl text-vintage-teal tracking-wider uppercase mb-6">1. Tipografía</h2>
+                
+                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders">
+                    <p class="font-vintage text-4xl mb-2 text-vintage-cream">BANGERS</p>
+                    <p class="text-vintage-gray text-xs uppercase mb-6">Títulos / UI Destacada / No Jugable</p>
+                    
+                    <p class="font-mono font-bold text-3xl mb-2 text-vintage-yellow drop-shadow-glow-yellow tracking-widest">JETBRAINS MONO</p>
+                    <p class="text-vintage-gray text-xs uppercase">Gameplay / Alta Legibilidad / Cero Distracción</p>
+                </div>
+            </div>
+
+            <!-- Paleta de Colores -->
+            <div class="space-y-6">
+                <h2 class="font-vintage text-3xl text-vintage-teal tracking-wider uppercase mb-6">2. Paleta Funcional (Dark Mode)</h2>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
+                        <div class="w-12 h-12 bg-ink-black border-2 border-vintage-gray rounded-full mb-2"></div>
+                        <span class="text-[10px] uppercase text-vintage-gray text-center">Fondo Principal<br>#111111</span>
+                    </div>
+                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
+                        <div class="w-12 h-12 bg-vintage-yellow border-2 border-black rounded-full mb-2 shadow-glow-yellow"></div>
+                        <span class="text-[10px] uppercase text-vintage-gray text-center">Foco / Actual<br>#FFDB58</span>
+                    </div>
+                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
+                        <div class="w-12 h-12 bg-vintage-red border-2 border-black rounded-full mb-2 shadow-glow-red"></div>
+                        <span class="text-[10px] uppercase text-vintage-gray text-center">Error / Peligro<br>#E32636</span>
+                    </div>
+                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
+                        <div class="w-12 h-12 bg-vintage-teal border-2 border-black rounded-full mb-2"></div>
+                        <span class="text-[10px] uppercase text-vintage-gray text-center">Combo / Acierto<br>#5BC0BE</span>
+                    </div>
+                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
+                        <div class="w-12 h-12 bg-vintage-cream border-2 border-black rounded-full mb-2"></div>
+                        <span class="text-[10px] uppercase text-vintage-gray text-center">Texto por escribir<br>#F4E7D3</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: ESTADOS DEL TEXTO (CRÍTICO) -->
+        <section class="space-y-6 border-t-2 border-dashed border-vintage-gray pt-8">
+            <h2 class="font-vintage text-3xl text-vintage-teal tracking-wider uppercase mb-6">3. Estados del Texto</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <!-- Estado 1 -->
+                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders flex flex-col items-center justify-center">
+                    <span class="text-xs text-vintage-gray mb-4 uppercase">1. Escrito (Ghost)</span>
+                    <span class="font-mono text-3xl text-vintage-gray opacity-40">word</span>
+                </div>
+                <!-- Estado 2 -->
+                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders flex flex-col items-center justify-center border-vintage-yellow relative">
+                    <span class="text-xs text-vintage-yellow mb-4 uppercase">2. Letra Actual (Foco)</span>
+                    <span class="font-mono text-4xl text-vintage-yellow font-bold drop-shadow-glow-yellow relative">
+                        w<span class="absolute bottom-[-4px] left-0 w-full h-[4px] bg-vintage-yellow animate-cursor-blink"></span>
+                    </span>
+                </div>
+                <!-- Estado 3 -->
+                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders flex flex-col items-center justify-center">
+                    <span class="text-xs text-vintage-cream mb-4 uppercase opacity-70">3. Por Escribir</span>
+                    <span class="font-mono text-3xl text-vintage-cream">ord</span>
+                </div>
+                <!-- Estado 4 -->
+                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders border-vintage-red flex flex-col items-center justify-center">
+                    <span class="text-xs text-vintage-red mb-4 uppercase">4. Error (Typo)</span>
+                    <span class="font-mono text-4xl text-vintage-red font-bold animate-shake line-through decoration-black decoration-4 drop-shadow-glow-red">x</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: MOCKUP DEL GAMEPLAY -->
+        <section class="space-y-6 border-t-2 border-dashed border-vintage-gray pt-8 pb-16">
+            <h2 class="font-vintage text-3xl text-vintage-teal tracking-wider uppercase mb-6 text-center">4. Gameplay Mockup (Flow State)</h2>
+            
+            <!-- CONTENEDOR DEL JUEGO (Dark, limpio en el centro, inky en los bordes) -->
+            <div class="relative w-full max-w-4xl mx-auto bg-ink-darker hand-drawn-border shadow-[8px_8px_0px_0px_rgba(244,231,211,0.1)] p-8 md:p-16 inky-borders flex flex-col items-center min-h-[400px]">
+                
+                <!-- HUD Periférico (Minimalista) -->
+                <div class="absolute top-4 left-6 right-6 flex justify-between items-start opacity-80">
+                    <!-- Timer -->
+                    <div class="flex flex-col">
+                        <span class="font-vintage text-2xl text-vintage-cream tracking-widest">Time</span>
+                        <!-- Barra estilo tinta -->
+                        <div class="w-32 h-4 bg-ink-black hand-drawn-border border-vintage-cream p-0.5 mt-1">
+                            <div class="w-2/3 h-full bg-vintage-cream"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Combo -->
+                    <div class="flex flex-col items-end">
+                        <span class="font-vintage text-2xl text-vintage-teal tracking-widest animate-pulse">Combo x14!</span>
+                        <div class="w-32 h-4 bg-ink-black hand-drawn-border border-vintage-teal p-0.5 mt-1 flex justify-end">
+                            <div class="w-full h-full bg-vintage-teal"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÁREA CENTRAL DE TEXTO (Puro espacio negativo, sin filtros, ultra legible) -->
+                <div class="flex-1 w-full flex items-center justify-center mt-8">
+                    
+                    <!-- Contenedor del flujo de palabras -->
+                    <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-4 font-mono text-4xl md:text-5xl font-bold tracking-widest">
+                        
+                        <!-- Palabras Ya escritas -->
+                        <span class="text-vintage-gray opacity-30">the</span>
+                        <span class="text-vintage-gray opacity-30">quick</span>
+                        <span class="text-vintage-gray opacity-30">brown</span>
+                        
+                        <!-- PALABRA ACTUAL (Jugando) -->
+                        <span class="flex items-center">
+                            <!-- Letras superadas -->
+                            <span class="text-vintage-gray opacity-50">f</span>
+                            <!-- LETRA EN FOCO (Amarillo neón + Cursor) -->
+                            <span class="text-vintage-yellow drop-shadow-glow-yellow relative z-10 transform scale-110 mx-0.5">
+                                o
+                                <!-- Cursor Custom -->
+                                <span class="absolute -bottom-2 left-0 w-full h-[4px] bg-vintage-yellow animate-cursor-blink shadow-glow-yellow"></span>
+                            </span>
+                            <!-- Letras por escribir -->
+                            <span class="text-vintage-cream">x</span>
+                        </span>
+
+                        <!-- Siguientes palabras (Legibles pero no brillantes) -->
+                        <span class="text-vintage-cream opacity-90">jumps</span>
+                        <span class="text-vintage-cream opacity-90">over</span>
+                        
+                        <!-- SIMULACIÓN DE ERROR EN UNA PALABRA FUTURA (Solo para el mockup) -->
+                        <span class="text-vintage-cream opacity-90 flex">
+                            t<span class="text-vintage-red animate-shake line-through decoration-ink-black decoration-4 drop-shadow-glow-red">h</span>e
+                        </span>
+
+                        <span class="text-vintage-cream opacity-90">lazy</span>
+                        <span class="text-vintage-cream opacity-90">dog</span>
+                    </div>
+
+                </div>
+
+                <!-- Feedback Visual (Partículas de acierto / Velocidad) simuladas -->
+                <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-center pointer-events-none opacity-50">
+                    <p class="font-vintage text-vintage-teal text-xl tracking-widest mb-2 animate-float">120 WPM</p>
+                    <!-- Líneas de velocidad sutiles (CSS art) -->
+                    <div class="flex gap-4 justify-center">
+                        <div class="w-16 h-0.5 bg-vintage-teal/30"></div>
+                        <div class="w-24 h-0.5 bg-vintage-teal/30"></div>
+                        <div class="w-16 h-0.5 bg-vintage-teal/30"></div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <p class="text-center text-vintage-gray text-xs font-mono max-w-2xl mx-auto mt-4">
+                * Nota UX: El fondo de juego utiliza un gris carbón (#111) en lugar de negro puro (#000) para reducir la fatiga visual. El área central carece de texturas complejas para garantizar contraste absoluto con las letras.
+            </p>
+
+        </section>
+
+    </main>
+
+</body>
+</html>

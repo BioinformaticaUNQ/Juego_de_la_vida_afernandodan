@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>POC Sellos de Aminoacidos</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Spectral:wght@400;600&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg-night: #11151f;
+			--bg-glow: #1b2336;
+			--panel: #172033;
+			--panel-soft: #202d46;
+			--gold: #d8b36b;
+			--gold-soft: #b99658;
+			--ice: #a4e8da;
+			--ink: #e9e5d5;
+			--muted: #99a2b8;
+			--danger: #c05252;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			font-family: "Spectral", Georgia, serif;
+			color: var(--ink);
+			background:
+				radial-gradient(circle at 20% 15%, rgba(164, 232, 218, 0.12), transparent 42%),
+				radial-gradient(circle at 80% 80%, rgba(216, 179, 107, 0.14), transparent 38%),
+				linear-gradient(145deg, var(--bg-night), var(--bg-glow));
+			display: grid;
+			place-items: center;
+			padding: 24px;
+		}
+
+		.amino-seal {
+			width: min(1100px, 100%);
+			border: 1px solid rgba(216, 179, 107, 0.45);
+			border-radius: 20px;
+			background: linear-gradient(165deg, rgba(23, 32, 51, 0.95), rgba(17, 21, 31, 0.98));
+			box-shadow: 0 16px 45px rgba(0, 0, 0, 0.45);
+			overflow: hidden;
+		}
+
+		.amino-seal__head {
+			padding: 20px 24px;
+			border-bottom: 1px solid rgba(216, 179, 107, 0.25);
+			display: flex;
+			justify-content: space-between;
+			gap: 18px;
+			align-items: end;
+			flex-wrap: wrap;
+		}
+
+		.amino-seal__title {
+			margin: 0;
+			font-family: "Cinzel", "Times New Roman", serif;
+			font-size: clamp(1.3rem, 2.4vw, 2rem);
+			letter-spacing: 0.06em;
+			text-transform: uppercase;
+		}
+
+		.amino-seal__subtitle {
+			margin: 4px 0 0;
+			color: var(--muted);
+			font-size: 0.98rem;
+		}
+
+		.amino-seal__search {
+			width: min(330px, 100%);
+		}
+
+		.amino-seal__search input {
+			width: 100%;
+			background: #0f1626;
+			color: var(--ink);
+			border: 1px solid rgba(216, 179, 107, 0.4);
+			border-radius: 10px;
+			padding: 11px 12px;
+			font: inherit;
+			outline: none;
+			transition: border-color 180ms ease, box-shadow 180ms ease;
+		}
+
+		.amino-seal__search input:focus {
+			border-color: var(--ice);
+			box-shadow: 0 0 0 3px rgba(164, 232, 218, 0.2);
+		}
+
+		.amino-seal__body {
+			display: grid;
+			grid-template-columns: 1.1fr 1fr;
+			gap: 22px;
+			padding: 22px;
+		}
+
+		.seal-stage {
+			background: var(--panel);
+			border: 1px solid rgba(216, 179, 107, 0.25);
+			border-radius: 16px;
+			padding: 20px;
+			min-height: 560px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 14px;
+		}
+
+		.seal-ring {
+			width: min(360px, 90%);
+			aspect-ratio: 1;
+			border-radius: 50%;
+			position: relative;
+			display: grid;
+			place-items: center;
+			background:
+				radial-gradient(circle, rgba(164, 232, 218, 0.16) 0%, rgba(164, 232, 218, 0.04) 53%, transparent 62%),
+				conic-gradient(from 0deg, rgba(216, 179, 107, 0.32), rgba(164, 232, 218, 0.26), rgba(216, 179, 107, 0.32));
+			animation: seal-rotate 20s linear infinite;
+		}
+
+		.seal-ring::before,
+		.seal-ring::after {
+			content: "";
+			position: absolute;
+			border-radius: 50%;
+			inset: 8%;
+			border: 2px dashed rgba(216, 179, 107, 0.55);
+		}
+
+		.seal-ring::after {
+			inset: 18%;
+			border-style: solid;
+			border-color: rgba(164, 232, 218, 0.38);
+			animation: seal-rotate-reverse 14s linear infinite;
+		}
+
+		.seal-core {
+			width: 56%;
+			aspect-ratio: 1;
+			border-radius: 50%;
+			background: radial-gradient(circle at 35% 30%, #2e4669, #172033 72%);
+			border: 1px solid rgba(216, 179, 107, 0.46);
+			display: grid;
+			place-items: center;
+			box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.55), 0 0 40px rgba(164, 232, 218, 0.16);
+			overflow: hidden;
+			animation: pulse 2.8s ease-in-out infinite;
+		}
+
+		.seal-core img {
+			width: 72%;
+			height: 72%;
+			object-fit: contain;
+			filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.6));
+			opacity: 0;
+			transform: scale(0.88);
+			transition: opacity 220ms ease, transform 220ms ease;
+		}
+
+		.seal-core img.is-ready {
+			opacity: 1;
+			transform: scale(1);
+		}
+
+		.seal-info {
+			text-align: center;
+			margin-top: 10px;
+		}
+
+		.seal-name {
+			margin: 0;
+			font-family: "Cinzel", "Times New Roman", serif;
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+			font-size: clamp(1rem, 2.2vw, 1.4rem);
+		}
+
+		.seal-file {
+			margin: 6px 0 0;
+			color: var(--muted);
+			font-size: 0.9rem;
+		}
+
+		.seal-actions {
+			margin-top: 8px;
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+			justify-content: center;
+		}
+
+		.seal-btn {
+			border: 1px solid rgba(216, 179, 107, 0.45);
+			background: var(--panel-soft);
+			color: var(--ink);
+			font: inherit;
+			padding: 9px 14px;
+			border-radius: 999px;
+			cursor: pointer;
+			transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+		}
+
+		.seal-btn:hover {
+			transform: translateY(-2px);
+			border-color: var(--ice);
+			background: #253756;
+		}
+
+		.seal-grid {
+			background: var(--panel);
+			border: 1px solid rgba(216, 179, 107, 0.25);
+			border-radius: 16px;
+			padding: 14px;
+			display: grid;
+			grid-template-columns: repeat(3, minmax(96px, 1fr));
+			gap: 10px;
+			align-content: start;
+			overflow: auto;
+			max-height: 560px;
+		}
+
+		.seal-chip {
+			border: 1px solid rgba(216, 179, 107, 0.32);
+			border-radius: 12px;
+			background: #141c2d;
+			color: var(--ink);
+			cursor: pointer;
+			min-height: 112px;
+			padding: 8px;
+			display: grid;
+			place-items: center;
+			text-align: center;
+			gap: 6px;
+			transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+		}
+
+		.seal-chip:hover {
+			transform: translateY(-2px);
+			border-color: var(--ice);
+		}
+
+		.seal-chip[aria-current="true"] {
+			border-color: var(--gold);
+			box-shadow: 0 0 0 2px rgba(216, 179, 107, 0.2) inset;
+		}
+
+		.seal-chip img {
+			width: 52px;
+			height: 52px;
+			object-fit: contain;
+			filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+		}
+
+		.seal-chip span {
+			font-size: 0.78rem;
+			line-height: 1.1;
+		}
+
+		.seal-empty {
+			grid-column: 1 / -1;
+			color: var(--muted);
+			text-align: center;
+			padding: 16px;
+		}
+
+		.seal-broken {
+			color: var(--danger);
+			font-size: 0.9rem;
+			min-height: 1.2em;
+			margin: 0;
+		}
+
+		@keyframes seal-rotate {
+			from { transform: rotate(0deg); }
+			to { transform: rotate(360deg); }
+		}
+
+		@keyframes seal-rotate-reverse {
+			from { transform: rotate(360deg); }
+			to { transform: rotate(0deg); }
+		}
+
+		@keyframes pulse {
+			0%, 100% { box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.55), 0 0 40px rgba(164, 232, 218, 0.16); }
+			50% { box-shadow: inset 0 0 46px rgba(0, 0, 0, 0.7), 0 0 60px rgba(216, 179, 107, 0.18); }
+		}
+
+		@media (max-width: 980px) {
+			.amino-seal__body {
+				grid-template-columns: 1fr;
+			}
+
+			.seal-stage,
+			.seal-grid {
+				min-height: auto;
+				max-height: none;
+			}
+
+			.seal-grid {
+				grid-template-columns: repeat(3, minmax(90px, 1fr));
+			}
+		}
+
+		@media (max-width: 640px) {
+			body {
+				padding: 14px;
+			}
+
+			.amino-seal__head {
+				padding: 16px;
+			}
+
+			.amino-seal__body {
+				padding: 14px;
+				gap: 14px;
+			}
+
+			.seal-grid {
+				grid-template-columns: repeat(2, minmax(92px, 1fr));
+			}
+		}
+	</style>
+</head>
+<body>
+	<section class="amino-seal" id="aminoSealComponent">
+		<header class="amino-seal__head">
+			<div>
+				<h1 class="amino-seal__title">Archivo Arcanico de Sellos</h1>
+				<p class="amino-seal__subtitle">Prueba de concepto para visualizar cada aminoacido como sello de fantasia.</p>
+			</div>
+			<label class="amino-seal__search">
+				<input id="sealSearch" type="search" placeholder="Buscar aminoacido o archivo..." aria-label="Buscar sello">
+			</label>
+		</header>
+
+		<div class="amino-seal__body">
+			<article class="seal-stage" aria-live="polite">
+				<div class="seal-ring">
+					<div class="seal-core">
+						<img id="sealMainImage" alt="Sello principal">
+					</div>
+				</div>
+				<div class="seal-info">
+					<h2 class="seal-name" id="sealMainName">-</h2>
+					<p class="seal-file" id="sealMainFile">-</p>
+					<p class="seal-broken" id="sealStatus"></p>
+				</div>
+				<div class="seal-actions">
+					<button class="seal-btn" id="sealPrev" type="button">Anterior</button>
+					<button class="seal-btn" id="sealRandom" type="button">Invocar Aleatorio</button>
+					<button class="seal-btn" id="sealNext" type="button">Siguiente</button>
+				</div>
+			</article>
+
+			<aside class="seal-grid" id="sealGrid"></aside>
+		</div>
+	</section>
+
+	<script>
+		const assetFiles = [
+			"Adenine.png",
+			"Alanine.png",
+			"Arginine.png",
+			"Asparagine.png",
+			"Aspartic acid.png",
+			"Cysteine.png",
+			"Glicyne.png",
+			"Glutamic acid.png",
+			"Glutamine.png",
+			"Histidine.png",
+			"Isoleucine.png",
+			"Leucine.png",
+			"Lysine.png",
+			"Methionine.png",
+			"Phenylalanine.png",
+			"Proline.png",
+			"Serine.png",
+			"Threonine.png",
+			"Tryptophan.png",
+			"Tyrosine.png",
+			"Valine.png"
+		];
+
+		const state = {
+			all: assetFiles.map((fileName, idx) => ({
+				id: idx,
+				fileName,
+				title: toDisplayName(fileName),
+				src: `assets/${encodeURIComponent(fileName)}`
+			})),
+			filtered: [],
+			currentIndex: 0
+		};
+
+		const ui = {
+			mainImage: document.getElementById("sealMainImage"),
+			mainName: document.getElementById("sealMainName"),
+			mainFile: document.getElementById("sealMainFile"),
+			status: document.getElementById("sealStatus"),
+			grid: document.getElementById("sealGrid"),
+			search: document.getElementById("sealSearch"),
+			prev: document.getElementById("sealPrev"),
+			next: document.getElementById("sealNext"),
+			random: document.getElementById("sealRandom")
+		};
+
+		function toDisplayName(fileName) {
+			return fileName.replace(".png", "").replace(/_/g, " ");
+		}
+
+		function clampIndex(index, length) {
+			if (length === 0) return 0;
+			if (index < 0) return length - 1;
+			if (index >= length) return 0;
+			return index;
+		}
+
+		function setCurrentByIndex(index) {
+			if (state.filtered.length === 0) return;
+			state.currentIndex = clampIndex(index, state.filtered.length);
+			const item = state.filtered[state.currentIndex];
+
+			ui.mainImage.classList.remove("is-ready");
+			ui.mainImage.src = item.src;
+			ui.mainImage.alt = `Sello de ${item.title}`;
+			ui.mainName.textContent = item.title;
+			ui.mainFile.textContent = item.fileName;
+			ui.status.textContent = "";
+
+			refreshGridSelection();
+		}
+
+		function refreshGridSelection() {
+			const buttons = ui.grid.querySelectorAll(".seal-chip");
+			buttons.forEach((btn, i) => {
+				btn.setAttribute("aria-current", i === state.currentIndex ? "true" : "false");
+			});
+		}
+
+		function renderGrid() {
+			if (state.filtered.length === 0) {
+				ui.grid.innerHTML = '<p class="seal-empty">No hay coincidencias para ese termino.</p>';
+				ui.mainName.textContent = "Sin resultados";
+				ui.mainFile.textContent = "-";
+				ui.mainImage.removeAttribute("src");
+				ui.status.textContent = "";
+				return;
+			}
+
+			ui.grid.innerHTML = state.filtered.map((item, index) => `
+				<button class="seal-chip" type="button" data-index="${index}" aria-current="false">
+					<img src="${item.src}" alt="${item.title}">
+					<span>${item.title}</span>
+				</button>
+			`).join("");
+
+			const chipButtons = ui.grid.querySelectorAll(".seal-chip");
+			chipButtons.forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const nextIndex = Number(btn.dataset.index || "0");
+					setCurrentByIndex(nextIndex);
+				});
+			});
+
+			setCurrentByIndex(clampIndex(state.currentIndex, state.filtered.length));
+		}
+
+		function applyFilter(term) {
+			const value = term.trim().toLowerCase();
+			state.filtered = state.all.filter((item) => {
+				return item.title.toLowerCase().includes(value) || item.fileName.toLowerCase().includes(value);
+			});
+			state.currentIndex = 0;
+			renderGrid();
+		}
+
+		ui.mainImage.addEventListener("load", () => {
+			ui.mainImage.classList.add("is-ready");
+		});
+
+		ui.mainImage.addEventListener("error", () => {
+			ui.mainImage.classList.remove("is-ready");
+			ui.status.textContent = "No se pudo cargar esta imagen en assets.";
+		});
+
+		ui.search.addEventListener("input", (event) => {
+			applyFilter(event.target.value || "");
+		});
+
+		ui.prev.addEventListener("click", () => {
+			setCurrentByIndex(state.currentIndex - 1);
+		});
+
+		ui.next.addEventListener("click", () => {
+			setCurrentByIndex(state.currentIndex + 1);
+		});
+
+		ui.random.addEventListener("click", () => {
+			if (state.filtered.length === 0) return;
+			const randomIndex = Math.floor(Math.random() * state.filtered.length);
+			setCurrentByIndex(randomIndex);
+		});
+
+		document.addEventListener("keydown", (event) => {
+			if (event.key === "ArrowLeft") {
+				event.preventDefault();
+				setCurrentByIndex(state.currentIndex - 1);
+			}
+			if (event.key === "ArrowRight") {
+				event.preventDefault();
+				setCurrentByIndex(state.currentIndex + 1);
+			}
+		});
+
+		applyFilter("");
+	</script>
+</body>
+</html>
