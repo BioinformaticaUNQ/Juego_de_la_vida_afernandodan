@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INK & KEYS // DESIGN SYSTEM</title>
+    <title>INK & CELLULOID // VINTAGE UI KIT</title>
     
-    <!-- Fuentes: Bangers (Retro/Vintage Title) y JetBrains Mono (Mecanografía ultralegible) -->
+    <!-- Fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,29 +21,31 @@
                         'mono': ['"JetBrains Mono"', 'monospace'],
                     },
                     colors: {
-                        'ink-black': '#111111',       // Fondo oscuro para la vista
-                        'ink-darker': '#0a0a0a',      // Fondo absoluto
-                        'vintage-cream': '#F4E7D3',   // Letras por escribir / UI neutra
-                        'vintage-red': '#E32636',     // Errores / Peligro
-                        'vintage-yellow': '#FFDB58',  // Letra actual / Foco
-                        'vintage-teal': '#5BC0BE',    // Aciertos / Combo
-                        'vintage-gray': '#555555',    // Texto ya escrito
+                        'ink-bg': '#1a1818',          // Fondo carbón oscuro
+                        'ink-black': '#000000',       // Tinta pura
+                        'vintage-cream': '#F4E7D3',   // Papel viejo / Base / Neutro Claro
+                        'vintage-red': '#E32636',     // Peligro / Error / Destructivo
+                        'vintage-yellow': '#FFDB58',  // Advertencia / Foco / Primario Alterno
+                        'vintage-teal': '#5BC0BE',    // Información / Primario
+                        'vintage-green': '#8FBC8F',   // Éxito / Confirmación
+                        'vintage-purple': '#9370DB',  // Especial / Secundario
+                        'vintage-gray': '#555555',    // Deshabilitado / Muted
                     },
                     boxShadow: {
-                        'comic': '4px 4px 0px 0px rgba(0,0,0,1)',
-                        'glow-yellow': '0 0 15px rgba(255, 219, 88, 0.6)',
-                        'glow-red': '0 0 15px rgba(227, 38, 54, 0.8)',
+                        'comic': '6px 6px 0px 0px rgba(0,0,0,1)',
+                        'comic-sm': '3px 3px 0px 0px rgba(0,0,0,1)',
+                        'comic-hover': '2px 2px 0px 0px rgba(0,0,0,1)',
+                        'glow-yellow': '0 0 20px rgba(255, 219, 88, 0.4)',
+                        'glow-red': '0 0 20px rgba(227, 38, 54, 0.6)',
                     },
                     animation: {
-                        'cursor-blink': 'blink 1s step-end infinite',
                         'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
                         'float': 'float 3s ease-in-out infinite',
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                        'conveyor': 'conveyor 2s linear infinite',
                     },
                     keyframes: {
-                        blink: {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: 0 },
-                        },
                         shake: {
                             '10%, 90%': { transform: 'translate3d(-2px, 0, 0)' },
                             '20%, 80%': { transform: 'translate3d(4px, 0, 0)' },
@@ -53,6 +55,10 @@
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
                             '50%': { transform: 'translateY(-5px)' },
+                        },
+                        conveyor: {
+                            '0%': { backgroundPosition: '0px 0px' },
+                            '100%': { backgroundPosition: '40px 0px' },
                         }
                     }
                 }
@@ -62,220 +68,473 @@
 
     <style>
         body {
-            background-color: #111111;
+            background-color: #1a1818;
             color: #F4E7D3;
-            /* Textura de papel antiguo/ruido muy sutil para el fondo oscuro */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            /* Textura de celuloide antiguo/ruido */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
         }
 
-        /* EL SECRETO DEL ESTILO 1930s: Filtro SVG de tinta rasgada/temblorosa.
-           Se aplica a la UI, pero NUNCA al texto jugable para mantener la legibilidad.
-        */
-        .inky-borders {
-            filter: url(#wobble-ink);
-        }
+        /* Filtro SVG de tinta rasgada/temblorosa (Rubber Hose Style) */
+        .inky-borders { filter: url(#wobble-ink); }
 
-        /* Estilo de línea dibujada a mano */
+        /* Trazos dibujados a mano generales */
         .hand-drawn-border {
-            border: 4px solid #F4E7D3;
-            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
-        }
-        
-        .hand-drawn-border-dark {
             border: 4px solid #000;
             border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
         }
+        
+        .hand-drawn-border-light {
+            border: 4px solid #F4E7D3;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+        }
 
-        /* Scrollbar minimalista y oscura */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
-        ::-webkit-scrollbar-track { background: #111; }
+        /* Formas orgánicas */
+        .organic-bubble {
+            border-radius: 50% 40% 60% 40% / 40% 50% 40% 60%;
+        }
+
+        /* Elementos interactivos */
+        .btn-comic {
+            transition: all 0.15s ease-in-out;
+        }
+        .btn-comic:hover {
+            transform: translate(3px, 3px);
+            box-shadow: 3px 3px 0px 0px rgba(0,0,0,1);
+        }
+        .btn-comic:active {
+            transform: translate(6px, 6px);
+            box-shadow: 0px 0px 0px 0px rgba(0,0,0,1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; border: 2px solid #1a1818; }
+        ::-webkit-scrollbar-thumb:hover { background: #F4E7D3; }
+        ::-webkit-scrollbar-track { background: #1a1818; border-left: 1px dashed #555; }
     </style>
 </head>
 <body class="font-mono antialiased min-h-screen p-4 md:p-8 selection:bg-vintage-yellow selection:text-black">
 
-    <!-- SVG Definitions for Ink Effects -->
+    <!-- Filtro SVG Global -->
     <svg width="0" height="0" class="absolute hidden">
         <defs>
-            <!-- Filtro para bordes rasgados/temblorosos como tinta -->
             <filter id="wobble-ink">
-                <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+                <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
             </filter>
         </defs>
     </svg>
 
-    <!-- Contenedor Principal -->
-    <main class="max-w-5xl mx-auto space-y-12">
+    <main class="max-w-6xl mx-auto space-y-16 pb-20">
         
-        <!-- HEADER SYSTEM -->
-        <header class="text-center space-y-4 pt-4">
-            <h1 class="font-vintage text-6xl md:text-8xl tracking-widest text-vintage-cream uppercase drop-shadow-[4px_4px_0_rgba(0,0,0,1)] hand-drawn-border inline-block px-8 py-4 bg-vintage-red inky-borders">
-                Ink & Keys
-            </h1>
-            <p class="text-vintage-gray font-bold tracking-widest uppercase text-sm">Design System // Speed Typing Arcade</p>
+        <!-- HEADER -->
+        <header class="text-center space-y-6 pt-8 border-b-4 border-dashed border-vintage-gray pb-12">
+            <div class="inline-block relative">
+                <h1 class="font-vintage text-5xl md:text-7xl tracking-widest text-vintage-cream uppercase shadow-comic hand-drawn-border inline-block px-10 py-6 bg-ink-bg inky-borders relative z-10 border-vintage-cream">
+                    Ink & <span class="text-vintage-yellow">Celluloid</span>
+                </h1>
+            </div>
+            <p class="text-vintage-teal font-bold tracking-widest uppercase text-lg max-w-2xl mx-auto">
+                Guía de Estilos y Componentes UI
+            </p>
+            <p class="text-vintage-gray text-sm max-w-2xl mx-auto">
+                Un sistema de diseño formal inspirado en la estética "Rubber Hose" de los años 30 y las interfaces de terminal clásicas. Prioriza el alto contraste, bordes irregulares y legibilidad técnica.
+            </p>
         </header>
 
-        <!-- SECCIÓN 1: PALETA Y TIPOGRAFÍA -->
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-8 border-t-2 border-dashed border-vintage-gray pt-8">
+        <!-- 1. COLOR PALETTE -->
+        <section class="space-y-8">
+            <h2 class="font-vintage text-4xl text-vintage-cream tracking-wider uppercase flex items-center gap-4">
+                <span class="w-8 h-8 bg-vintage-cream rounded-full shadow-comic border-2 border-black"></span>
+                1. Paleta de Color
+            </h2>
             
-            <!-- Tipografía -->
-            <div class="space-y-6">
-                <h2 class="font-vintage text-3xl text-vintage-teal tracking-wider uppercase mb-6">1. Tipografía</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <!-- Cream -->
+                <div class="space-y-2">
+                    <div class="h-24 bg-vintage-cream border-4 border-black hand-drawn-border shadow-comic"></div>
+                    <p class="font-bold text-vintage-cream text-lg">Cream / Base</p>
+                    <p class="text-vintage-gray text-xs">#F4E7D3 / text-ink-black</p>
+                </div>
+                <!-- Teal -->
+                <div class="space-y-2">
+                    <div class="h-24 bg-vintage-teal border-4 border-black hand-drawn-border shadow-comic"></div>
+                    <p class="font-bold text-vintage-teal text-lg">Teal / Primary</p>
+                    <p class="text-vintage-gray text-xs">#5BC0BE / text-ink-black</p>
+                </div>
+                <!-- Yellow -->
+                <div class="space-y-2">
+                    <div class="h-24 bg-vintage-yellow border-4 border-black hand-drawn-border shadow-comic"></div>
+                    <p class="font-bold text-vintage-yellow text-lg">Yellow / Warning</p>
+                    <p class="text-vintage-gray text-xs">#FFDB58 / text-ink-black</p>
+                </div>
+                <!-- Red -->
+                <div class="space-y-2">
+                    <div class="h-24 bg-vintage-red border-4 border-black hand-drawn-border shadow-comic"></div>
+                    <p class="font-bold text-vintage-red text-lg">Red / Danger</p>
+                    <p class="text-vintage-gray text-xs">#E32636 / text-vintage-cream</p>
+                </div>
+                <!-- Green -->
+                <div class="space-y-2">
+                    <div class="h-24 bg-vintage-green border-4 border-black hand-drawn-border shadow-comic"></div>
+                    <p class="font-bold text-vintage-green text-lg">Green / Success</p>
+                    <p class="text-vintage-gray text-xs">#8FBC8F / text-ink-black</p>
+                </div>
+                <!-- Purple -->
+                <div class="space-y-2">
+                    <div class="h-24 bg-vintage-purple border-4 border-black hand-drawn-border shadow-comic"></div>
+                    <p class="font-bold text-vintage-purple text-lg">Purple / Special</p>
+                    <p class="text-vintage-gray text-xs">#9370DB / text-ink-black</p>
+                </div>
+                <!-- Gray -->
+                <div class="space-y-2">
+                    <div class="h-24 bg-vintage-gray border-4 border-black hand-drawn-border shadow-comic"></div>
+                    <p class="font-bold text-vintage-gray text-lg">Gray / Muted</p>
+                    <p class="text-vintage-gray text-xs">#555555 / text-vintage-cream</p>
+                </div>
+                <!-- Ink Dark -->
+                <div class="space-y-2">
+                    <div class="h-24 bg-ink-bg border-4 border-vintage-gray hand-drawn-border-light shadow-comic"></div>
+                    <p class="font-bold text-vintage-cream text-lg">Ink BG / Dark</p>
+                    <p class="text-vintage-gray text-xs">#1a1818 / text-vintage-cream</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. TYPOGRAPHY -->
+        <section class="space-y-8 border-t-2 border-dashed border-vintage-gray pt-12">
+            <h2 class="font-vintage text-4xl text-vintage-cream tracking-wider uppercase flex items-center gap-4">
+                <span class="w-8 h-8 bg-vintage-yellow rounded-full shadow-comic border-2 border-black"></span>
+                2. Tipografía
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 bg-ink-bg border-4 border-vintage-gray p-8 hand-drawn-border inky-borders">
+                <!-- Display Font -->
+                <div class="space-y-6">
+                    <div class="border-b-2 border-black pb-2 mb-4">
+                        <span class="text-vintage-yellow font-bold uppercase text-xs tracking-widest">Display / Headers (Bangers)</span>
+                    </div>
+                    <h1 class="font-vintage text-6xl text-vintage-cream tracking-widest">Heading 1</h1>
+                    <h2 class="font-vintage text-5xl text-vintage-cream tracking-widest">Heading 2</h2>
+                    <h3 class="font-vintage text-4xl text-vintage-cream tracking-widest">Heading 3</h3>
+                    <h4 class="font-vintage text-2xl text-vintage-teal tracking-widest">Heading 4 - Subtitle</h4>
+                </div>
+
+                <!-- Body Font -->
+                <div class="space-y-6">
+                    <div class="border-b-2 border-black pb-2 mb-4">
+                        <span class="text-vintage-yellow font-bold uppercase text-xs tracking-widest">Body / Data (JetBrains Mono)</span>
+                    </div>
+                    <p class="text-base text-vintage-cream leading-relaxed">
+                        Párrafo base. El zorro marrón rápido salta sobre el perro perezoso. 0123456789. Esta fuente está optimizada para la lectura de datos, código y elementos de interfaz de usuario donde la claridad absoluta es necesaria.
+                    </p>
+                    <p class="text-sm text-vintage-gray leading-relaxed">
+                        Texto secundario o atenuado. Ideal para descripciones largas, notas al pie o estados deshabilitados.
+                    </p>
+                    <div class="bg-black p-4 rounded text-vintage-green font-bold text-sm inline-block hand-drawn-border shadow-comic-sm">
+                        > C:\SYSTEM\STYLE.EXE --RUN
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. BOTONES Y ACCIONES -->
+        <section class="space-y-8 border-t-2 border-dashed border-vintage-gray pt-12">
+            <h2 class="font-vintage text-4xl text-vintage-cream tracking-wider uppercase flex items-center gap-4">
+                <span class="w-8 h-8 bg-vintage-teal rounded-full shadow-comic border-2 border-black"></span>
+                3. Botones e Interacción
+            </h2>
+            
+            <div class="flex flex-wrap gap-6 items-center">
+                <!-- Primary Button -->
+                <button class="bg-vintage-teal text-ink-black font-bold uppercase tracking-widest px-8 py-4 hand-drawn-border shadow-comic btn-comic inky-borders flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Botón Primario
+                </button>
+
+                <!-- Warning/Accent Button -->
+                <button class="bg-vintage-yellow text-ink-black font-bold uppercase tracking-widest px-8 py-4 hand-drawn-border shadow-comic btn-comic flex items-center gap-2">
+                    Botón Destacado
+                </button>
+
+                <!-- Danger Button -->
+                <button class="bg-vintage-red text-vintage-cream font-bold uppercase tracking-widest px-8 py-4 hand-drawn-border shadow-comic btn-comic hover:animate-shake">
+                    Eliminar Datos
+                </button>
+
+                <!-- Secondary/Ghost Button -->
+                <button class="bg-transparent text-vintage-cream font-bold uppercase tracking-widest px-8 py-4 border-4 border-vintage-cream rounded-[255px_15px_225px_15px/15px_225px_15px_255px] shadow-comic btn-comic hover:bg-vintage-cream hover:text-ink-black">
+                    Secundario
+                </button>
+
+                <!-- Disabled -->
+                <button class="bg-vintage-gray text-ink-black font-bold uppercase tracking-widest px-8 py-4 hand-drawn-border opacity-50 cursor-not-allowed">
+                    Inactivo
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. TARJETAS Y CONTENEDORES -->
+        <section class="space-y-8 border-t-2 border-dashed border-vintage-gray pt-12">
+            <h2 class="font-vintage text-4xl text-vintage-cream tracking-wider uppercase flex items-center gap-4">
+                <span class="w-8 h-8 bg-vintage-red rounded-full shadow-comic border-2 border-black"></span>
+                4. Tarjetas y Contenedores
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Default Card -->
+                <div class="bg-vintage-cream p-6 hand-drawn-border shadow-comic flex flex-col relative group">
+                    <span class="absolute -top-3 left-4 bg-ink-black text-vintage-cream px-3 py-1 text-xs font-bold uppercase border-2 border-vintage-cream hand-drawn-border">Base Card</span>
+                    <h3 class="font-vintage text-3xl text-ink-black mt-4 mb-2">Contenedor Estándar</h3>
+                    <p class="text-ink-black text-sm mb-6 flex-grow">Utilizado para agrupar información general. El contraste oscuro sobre claro facilita la lectura extensiva de datos.</p>
+                    <button class="bg-ink-black text-vintage-cream font-bold uppercase text-xs tracking-widest px-4 py-2 hand-drawn-border btn-comic self-start">
+                        Leer Más
+                    </button>
+                </div>
+
+                <!-- Active/Focus Card -->
+                <div class="bg-vintage-yellow p-6 hand-drawn-border shadow-comic border-4 border-black relative transform md:-translate-y-2 z-10 inky-borders">
+                    <span class="absolute -top-3 left-4 bg-ink-black text-vintage-yellow px-3 py-1 text-xs font-bold uppercase border-2 border-vintage-yellow hand-drawn-border animate-pulse">Destacado</span>
+                    <h3 class="font-vintage text-3xl text-ink-black mt-4 mb-2">Estado Activo</h3>
+                    <p class="text-ink-black text-sm mb-6">Llama la atención del usuario hacia la tarea actual o la información más crítica de la pantalla.</p>
+                    <div class="w-full h-2 bg-ink-black border-y border-vintage-cream mt-auto" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.3) 10px, rgba(255,255,255,0.3) 20px);"></div>
+                </div>
+
+                <!-- Dark/Terminal Card -->
+                <div class="bg-ink-bg p-6 hand-drawn-border-light shadow-comic flex flex-col relative">
+                    <span class="absolute -top-3 left-4 bg-vintage-gray text-vintage-cream px-3 py-1 text-xs font-bold uppercase border-2 border-vintage-cream hand-drawn-border">Data View</span>
+                    <h3 class="font-vintage text-3xl text-vintage-teal mt-4 mb-2 drop-shadow-[2px_2px_0_#000]">Consola Oscura</h3>
+                    <p class="text-vintage-gray text-sm mb-6 flex-grow">Ideal para mostrar métricas, código, cuadros de mando (HUD) o elementos secundarios que no deben abrumar.</p>
+                    <div class="flex items-center gap-2 mt-auto text-vintage-green font-bold text-sm">
+                        <span class="w-2 h-2 bg-vintage-green rounded-full animate-pulse-fast"></span>
+                        Sistema en línea
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. FEEDBACK, ALERTAS Y BADGES -->
+        <section class="space-y-8 border-t-2 border-dashed border-vintage-gray pt-12">
+            <h2 class="font-vintage text-4xl text-vintage-cream tracking-wider uppercase flex items-center gap-4">
+                <span class="w-8 h-8 bg-vintage-purple rounded-full shadow-comic border-2 border-black"></span>
+                5. Feedback y Alertas
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
-                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders">
-                    <p class="font-vintage text-4xl mb-2 text-vintage-cream">BANGERS</p>
-                    <p class="text-vintage-gray text-xs uppercase mb-6">Títulos / UI Destacada / No Jugable</p>
+                <!-- Banners de Alerta -->
+                <div class="space-y-4">
+                    <h3 class="text-vintage-gray font-bold uppercase text-xs tracking-widest mb-4">Banners de Sistema</h3>
                     
-                    <p class="font-mono font-bold text-3xl mb-2 text-vintage-yellow drop-shadow-glow-yellow tracking-widest">JETBRAINS MONO</p>
-                    <p class="text-vintage-gray text-xs uppercase">Gameplay / Alta Legibilidad / Cero Distracción</p>
-                </div>
-            </div>
-
-            <!-- Paleta de Colores -->
-            <div class="space-y-6">
-                <h2 class="font-vintage text-3xl text-vintage-teal tracking-wider uppercase mb-6">2. Paleta Funcional (Dark Mode)</h2>
-                
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
-                        <div class="w-12 h-12 bg-ink-black border-2 border-vintage-gray rounded-full mb-2"></div>
-                        <span class="text-[10px] uppercase text-vintage-gray text-center">Fondo Principal<br>#111111</span>
-                    </div>
-                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
-                        <div class="w-12 h-12 bg-vintage-yellow border-2 border-black rounded-full mb-2 shadow-glow-yellow"></div>
-                        <span class="text-[10px] uppercase text-vintage-gray text-center">Foco / Actual<br>#FFDB58</span>
-                    </div>
-                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
-                        <div class="w-12 h-12 bg-vintage-red border-2 border-black rounded-full mb-2 shadow-glow-red"></div>
-                        <span class="text-[10px] uppercase text-vintage-gray text-center">Error / Peligro<br>#E32636</span>
-                    </div>
-                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
-                        <div class="w-12 h-12 bg-vintage-teal border-2 border-black rounded-full mb-2"></div>
-                        <span class="text-[10px] uppercase text-vintage-gray text-center">Combo / Acierto<br>#5BC0BE</span>
-                    </div>
-                    <div class="bg-ink-darker p-4 hand-drawn-border inky-borders flex flex-col items-center">
-                        <div class="w-12 h-12 bg-vintage-cream border-2 border-black rounded-full mb-2"></div>
-                        <span class="text-[10px] uppercase text-vintage-gray text-center">Texto por escribir<br>#F4E7D3</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECCIÓN 2: ESTADOS DEL TEXTO (CRÍTICO) -->
-        <section class="space-y-6 border-t-2 border-dashed border-vintage-gray pt-8">
-            <h2 class="font-vintage text-3xl text-vintage-teal tracking-wider uppercase mb-6">3. Estados del Texto</h2>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <!-- Estado 1 -->
-                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders flex flex-col items-center justify-center">
-                    <span class="text-xs text-vintage-gray mb-4 uppercase">1. Escrito (Ghost)</span>
-                    <span class="font-mono text-3xl text-vintage-gray opacity-40">word</span>
-                </div>
-                <!-- Estado 2 -->
-                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders flex flex-col items-center justify-center border-vintage-yellow relative">
-                    <span class="text-xs text-vintage-yellow mb-4 uppercase">2. Letra Actual (Foco)</span>
-                    <span class="font-mono text-4xl text-vintage-yellow font-bold drop-shadow-glow-yellow relative">
-                        w<span class="absolute bottom-[-4px] left-0 w-full h-[4px] bg-vintage-yellow animate-cursor-blink"></span>
-                    </span>
-                </div>
-                <!-- Estado 3 -->
-                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders flex flex-col items-center justify-center">
-                    <span class="text-xs text-vintage-cream mb-4 uppercase opacity-70">3. Por Escribir</span>
-                    <span class="font-mono text-3xl text-vintage-cream">ord</span>
-                </div>
-                <!-- Estado 4 -->
-                <div class="bg-ink-darker p-6 hand-drawn-border inky-borders border-vintage-red flex flex-col items-center justify-center">
-                    <span class="text-xs text-vintage-red mb-4 uppercase">4. Error (Typo)</span>
-                    <span class="font-mono text-4xl text-vintage-red font-bold animate-shake line-through decoration-black decoration-4 drop-shadow-glow-red">x</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECCIÓN 3: MOCKUP DEL GAMEPLAY -->
-        <section class="space-y-6 border-t-2 border-dashed border-vintage-gray pt-8 pb-16">
-            <h2 class="font-vintage text-3xl text-vintage-teal tracking-wider uppercase mb-6 text-center">4. Gameplay Mockup (Flow State)</h2>
-            
-            <!-- CONTENEDOR DEL JUEGO (Dark, limpio en el centro, inky en los bordes) -->
-            <div class="relative w-full max-w-4xl mx-auto bg-ink-darker hand-drawn-border shadow-[8px_8px_0px_0px_rgba(244,231,211,0.1)] p-8 md:p-16 inky-borders flex flex-col items-center min-h-[400px]">
-                
-                <!-- HUD Periférico (Minimalista) -->
-                <div class="absolute top-4 left-6 right-6 flex justify-between items-start opacity-80">
-                    <!-- Timer -->
-                    <div class="flex flex-col">
-                        <span class="font-vintage text-2xl text-vintage-cream tracking-widest">Time</span>
-                        <!-- Barra estilo tinta -->
-                        <div class="w-32 h-4 bg-ink-black hand-drawn-border border-vintage-cream p-0.5 mt-1">
-                            <div class="w-2/3 h-full bg-vintage-cream"></div>
+                    <!-- Success -->
+                    <div class="bg-vintage-green border-4 border-black p-4 shadow-comic flex items-center gap-4 inky-borders">
+                        <div class="w-10 h-10 bg-ink-black organic-bubble flex items-center justify-center flex-shrink-0">
+                            <span class="text-vintage-green font-bold text-xl">✓</span>
+                        </div>
+                        <div>
+                            <p class="font-vintage text-2xl text-ink-black tracking-wide">¡Operación Exitosa!</p>
+                            <p class="text-ink-black text-xs font-bold">Los datos se han guardado correctamente.</p>
                         </div>
                     </div>
-                    
-                    <!-- Combo -->
-                    <div class="flex flex-col items-end">
-                        <span class="font-vintage text-2xl text-vintage-teal tracking-widest animate-pulse">Combo x14!</span>
-                        <div class="w-32 h-4 bg-ink-black hand-drawn-border border-vintage-teal p-0.5 mt-1 flex justify-end">
-                            <div class="w-full h-full bg-vintage-teal"></div>
+
+                    <!-- Error/Danger -->
+                    <div class="bg-vintage-red border-4 border-black p-4 shadow-comic flex items-center gap-4 animate-shake">
+                        <div class="w-10 h-10 bg-ink-black border-2 border-vintage-cream organic-bubble flex items-center justify-center flex-shrink-0">
+                            <span class="text-vintage-red font-bold text-xl">X</span>
+                        </div>
+                        <div>
+                            <p class="font-vintage text-2xl text-vintage-cream tracking-wide">Error Crítico</p>
+                            <p class="text-ink-black text-xs font-bold">La conexión con el servidor se ha perdido.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- ÁREA CENTRAL DE TEXTO (Puro espacio negativo, sin filtros, ultra legible) -->
-                <div class="flex-1 w-full flex items-center justify-center mt-8">
+                <!-- Badges / Tags -->
+                <div class="space-y-4">
+                    <h3 class="text-vintage-gray font-bold uppercase text-xs tracking-widest mb-4">Etiquetas y Marcadores (Badges)</h3>
                     
-                    <!-- Contenedor del flujo de palabras -->
-                    <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-4 font-mono text-4xl md:text-5xl font-bold tracking-widest">
+                    <div class="bg-ink-bg border-4 border-vintage-gray p-8 hand-drawn-border flex flex-wrap gap-4 items-center">
                         
-                        <!-- Palabras Ya escritas -->
-                        <span class="text-vintage-gray opacity-30">the</span>
-                        <span class="text-vintage-gray opacity-30">quick</span>
-                        <span class="text-vintage-gray opacity-30">brown</span>
-                        
-                        <!-- PALABRA ACTUAL (Jugando) -->
-                        <span class="flex items-center">
-                            <!-- Letras superadas -->
-                            <span class="text-vintage-gray opacity-50">f</span>
-                            <!-- LETRA EN FOCO (Amarillo neón + Cursor) -->
-                            <span class="text-vintage-yellow drop-shadow-glow-yellow relative z-10 transform scale-110 mx-0.5">
-                                o
-                                <!-- Cursor Custom -->
-                                <span class="absolute -bottom-2 left-0 w-full h-[4px] bg-vintage-yellow animate-cursor-blink shadow-glow-yellow"></span>
-                            </span>
-                            <!-- Letras por escribir -->
-                            <span class="text-vintage-cream">x</span>
-                        </span>
+                        <!-- Standard Badge -->
+                        <div class="bg-vintage-cream border-2 border-black px-3 py-1 shadow-comic-sm transform -rotate-2">
+                            <span class="font-mono text-ink-black font-bold text-sm uppercase tracking-widest">Etiqueta</span>
+                        </div>
 
-                        <!-- Siguientes palabras (Legibles pero no brillantes) -->
-                        <span class="text-vintage-cream opacity-90">jumps</span>
-                        <span class="text-vintage-cream opacity-90">over</span>
-                        
-                        <!-- SIMULACIÓN DE ERROR EN UNA PALABRA FUTURA (Solo para el mockup) -->
-                        <span class="text-vintage-cream opacity-90 flex">
-                            t<span class="text-vintage-red animate-shake line-through decoration-ink-black decoration-4 drop-shadow-glow-red">h</span>e
-                        </span>
+                        <!-- Status: Active -->
+                        <div class="flex items-center gap-2 bg-black border-2 border-vintage-teal px-3 py-1 rounded-full">
+                            <span class="w-2 h-2 bg-vintage-teal rounded-full animate-pulse-fast"></span>
+                            <span class="text-vintage-teal text-xs font-bold uppercase">Online</span>
+                        </div>
 
-                        <span class="text-vintage-cream opacity-90">lazy</span>
-                        <span class="text-vintage-cream opacity-90">dog</span>
+                        <!-- Status: Inactive -->
+                        <div class="flex items-center gap-2 bg-black border-2 border-vintage-gray px-3 py-1 rounded-full">
+                            <span class="w-2 h-2 bg-vintage-gray rounded-full"></span>
+                            <span class="text-vintage-gray text-xs font-bold uppercase">Offline</span>
+                        </div>
+
+                        <!-- Organic Pill (Aminoácido style) -->
+                        <div class="w-12 h-12 bg-vintage-purple border-4 border-black shadow-comic organic-bubble inky-borders flex items-center justify-center relative hover:animate-float cursor-pointer">
+                            <div class="absolute top-1 right-2 w-2 h-2 bg-white rounded-full opacity-80"></div>
+                            <span class="font-vintage text-lg text-ink-black">#1</span>
+                        </div>
+                        
+                        <div class="w-12 h-12 bg-vintage-yellow border-4 border-black shadow-comic organic-bubble inky-borders flex items-center justify-center relative hover:animate-float cursor-pointer" style="animation-delay: 0.5s;">
+                            <div class="absolute top-1 right-2 w-2 h-2 bg-white rounded-full opacity-80"></div>
+                            <span class="font-vintage text-lg text-ink-black">#2</span>
+                        </div>
+
                     </div>
+                </div>
+            </div>
+        </section>
 
+        <!-- 6. INPUTS Y MÉTRICAS (HUD) -->
+        <section class="space-y-8 border-t-2 border-dashed border-vintage-gray pt-12 pb-12">
+            <h2 class="font-vintage text-4xl text-vintage-cream tracking-wider uppercase flex items-center gap-4">
+                <span class="w-8 h-8 bg-ink-black rounded-full shadow-comic border-2 border-vintage-cream"></span>
+                6. Formularios y Datos
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Inputs -->
+                <div class="space-y-6">
+                    <!-- Text Input -->
+                    <div class="space-y-2">
+                        <label class="font-bold text-vintage-teal uppercase tracking-widest text-sm">Nombre de Usuario</label>
+                        <input type="text" placeholder="Escribe aquí..." class="w-full bg-vintage-cream text-ink-black font-bold text-lg px-4 py-3 hand-drawn-border focus:outline-none focus:border-vintage-teal focus:bg-white focus:shadow-[0_0_15px_rgba(91,192,190,0.5)] transition-all placeholder:text-vintage-gray placeholder:font-normal">
+                    </div>
+                    
+                    <!-- Textarea styled as terminal -->
+                    <div class="space-y-2">
+                        <label class="font-bold text-vintage-yellow uppercase tracking-widest text-sm">Comando de Sistema</label>
+                        <div class="w-full bg-ink-black border-4 border-vintage-gray hand-drawn-border p-4 flex">
+                            <span class="text-vintage-green font-bold mr-2">></span>
+                            <textarea rows="3" placeholder="Ingresa el comando..." class="bg-transparent text-vintage-yellow font-bold w-full focus:outline-none resize-none placeholder:text-vintage-gray placeholder:opacity-50"></textarea>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Feedback Visual (Partículas de acierto / Velocidad) simuladas -->
-                <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-center pointer-events-none opacity-50">
-                    <p class="font-vintage text-vintage-teal text-xl tracking-widest mb-2 animate-float">120 WPM</p>
-                    <!-- Líneas de velocidad sutiles (CSS art) -->
-                    <div class="flex gap-4 justify-center">
-                        <div class="w-16 h-0.5 bg-vintage-teal/30"></div>
-                        <div class="w-24 h-0.5 bg-vintage-teal/30"></div>
-                        <div class="w-16 h-0.5 bg-vintage-teal/30"></div>
+                <!-- Métricas (Progress Bars) -->
+                <div class="space-y-6">
+                    <!-- Bar 1 -->
+                    <div class="bg-ink-bg border-4 border-vintage-cream p-4 hand-drawn-border inky-borders relative">
+                        <div class="flex justify-between items-end mb-2">
+                            <p class="font-vintage text-vintage-cream tracking-widest text-xl">Progreso de Carga</p>
+                            <p class="text-right font-mono font-bold text-vintage-green text-sm">85%</p>
+                        </div>
+                        <div class="h-6 w-full bg-ink-black border-2 border-black rounded-full overflow-hidden shadow-[inset_0_4px_4px_rgba(0,0,0,0.5)]">
+                            <div class="h-full bg-vintage-green w-[85%] border-r-4 border-black" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.2) 10px, rgba(0,0,0,0.2) 20px);"></div>
+                        </div>
+                    </div>
+
+                    <!-- HUD Stats -->
+                    <div class="bg-ink-bg border-4 border-vintage-cream p-4 hand-drawn-border inky-borders flex justify-around items-center">
+                        <div class="text-center">
+                            <p class="font-vintage text-vintage-gray tracking-widest text-lg">Errores</p>
+                            <p class="font-mono text-4xl font-bold text-vintage-red drop-shadow-glow-red">03</p>
+                        </div>
+                        <div class="w-1 h-12 bg-vintage-gray border-l-2 border-black"></div>
+                        <div class="text-center">
+                            <p class="font-vintage text-vintage-gray tracking-widest text-lg">Puntuación</p>
+                            <p class="font-mono text-4xl font-bold text-vintage-teal">1240</p>
+                        </div>
                     </div>
                 </div>
 
             </div>
-            
-            <p class="text-center text-vintage-gray text-xs font-mono max-w-2xl mx-auto mt-4">
-                * Nota UX: El fondo de juego utiliza un gris carbón (#111) en lugar de negro puro (#000) para reducir la fatiga visual. El área central carece de texturas complejas para garantizar contraste absoluto con las letras.
-            </p>
-
         </section>
+
+        <!-- ========================================== -->
+        <!-- LIGHT MODE PREVIEW                         -->
+        <!-- ========================================== -->
+        
+        <div class="mt-24 pt-12 border-t-8 border-double border-vintage-gray relative">
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-vintage-cream text-ink-black px-6 py-2 border-4 border-black hand-drawn-border shadow-comic font-vintage text-3xl tracking-widest uppercase">
+                Light Mode Preview
+            </div>
+            
+            <!-- Lienzo Claro -->
+            <div class="bg-vintage-cream text-ink-black p-6 md:p-12 rounded-[40px] border-4 border-black hand-drawn-border shadow-comic inky-borders space-y-12">
+                
+                <header class="text-center space-y-4 border-b-4 border-dashed border-black pb-8">
+                    <h2 class="font-vintage text-5xl tracking-widest uppercase">
+                        Versión <span class="text-vintage-teal">Día</span>
+                    </h2>
+                    <p class="font-mono text-sm max-w-xl mx-auto font-bold text-vintage-gray">
+                        Los mismos componentes adaptados para fondos claros. El contraste se mantiene usando bordes negros puros y sombras sólidas.
+                    </p>
+                </header>
+
+                <!-- Light Mode: Cards -->
+                <section class="space-y-6">
+                    <h3 class="font-vintage text-3xl uppercase flex items-center gap-4">
+                        <span class="w-6 h-6 bg-vintage-red rounded-full shadow-comic-sm border-2 border-black"></span>
+                        Tarjetas y Bloques
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Light Default Card -->
+                        <div class="bg-white p-6 hand-drawn-border shadow-comic flex flex-col relative group border-4 border-black">
+                            <span class="absolute -top-3 left-4 bg-ink-black text-white px-3 py-1 text-xs font-bold uppercase border-2 border-black hand-drawn-border">Base (Light)</span>
+                            <h4 class="font-vintage text-3xl text-ink-black mt-4 mb-2">Contenedor Claro</h4>
+                            <p class="text-ink-black text-sm mb-6 flex-grow">Fondo blanco puro para máxima legibilidad en modo claro. Los textos y bordes son completamente negros.</p>
+                            <button class="bg-vintage-teal text-ink-black font-bold uppercase text-xs tracking-widest px-4 py-2 border-4 border-black hand-drawn-border btn-comic self-start shadow-comic-sm">
+                                Acción Principal
+                            </button>
+                        </div>
+
+                        <!-- Light Dark Card (Inverted for contrast) -->
+                        <div class="bg-ink-bg p-6 hand-drawn-border shadow-comic flex flex-col relative text-vintage-cream border-4 border-black">
+                            <span class="absolute -top-3 left-4 bg-vintage-gray text-white px-3 py-1 text-xs font-bold uppercase border-2 border-black hand-drawn-border">Contraste</span>
+                            <h4 class="font-vintage text-3xl text-vintage-yellow mt-4 mb-2">Bloque Oscuro</h4>
+                            <p class="text-vintage-cream text-sm mb-6 flex-grow">Aún en modo claro, se pueden usar bloques oscuros invertidos para resaltar consolas, datos técnicos o alertas graves.</p>
+                            <div class="w-full h-2 bg-ink-black border-y border-vintage-cream mt-auto" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.3) 10px, rgba(255,255,255,0.3) 20px);"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Light Mode: Inputs & Buttons -->
+                <section class="space-y-6">
+                    <h3 class="font-vintage text-3xl uppercase flex items-center gap-4">
+                        <span class="w-6 h-6 bg-vintage-teal rounded-full shadow-comic-sm border-2 border-black"></span>
+                        Formularios e Interacción
+                    </h3>
+                    <div class="flex flex-wrap gap-6 items-center bg-white p-8 border-4 border-black hand-drawn-border shadow-[inset_0_4px_10px_rgba(0,0,0,0.05)]">
+                        <!-- Input -->
+                        <div class="space-y-2 flex-grow min-w-[250px]">
+                            <label class="font-bold text-ink-black uppercase tracking-widest text-sm">Buscar Entidad</label>
+                            <input type="text" placeholder="Escribe para buscar..." class="w-full bg-vintage-cream text-ink-black font-bold text-lg px-4 py-3 border-4 border-black hand-drawn-border focus:outline-none focus:bg-white shadow-[inset_4px_4px_0_rgba(0,0,0,0.05)] transition-all placeholder:text-vintage-gray">
+                        </div>
+                        
+                        <!-- Buttons -->
+                        <button class="bg-vintage-yellow text-ink-black font-bold uppercase tracking-widest px-8 py-4 border-4 border-black hand-drawn-border shadow-comic btn-comic mt-7">
+                            Explorar
+                        </button>
+                        <button class="bg-white text-ink-black font-bold uppercase tracking-widest px-8 py-4 border-4 border-black hand-drawn-border shadow-comic btn-comic mt-7">
+                            Cancelar
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Light Mode: Alerts -->
+                <section class="space-y-6">
+                    <h3 class="font-vintage text-3xl uppercase flex items-center gap-4">
+                        <span class="w-6 h-6 bg-vintage-purple rounded-full shadow-comic-sm border-2 border-black"></span>
+                        Retroalimentación
+                    </h3>
+                    <div class="bg-vintage-green border-4 border-black p-4 shadow-comic flex items-center gap-4 inky-borders">
+                        <div class="w-10 h-10 bg-white border-2 border-black organic-bubble flex items-center justify-center flex-shrink-0">
+                            <span class="text-ink-black font-bold text-xl">✓</span>
+                        </div>
+                        <div>
+                            <p class="font-vintage text-2xl text-ink-black tracking-wide">Modo Claro Activo</p>
+                            <p class="text-ink-black text-xs font-bold">El contraste de la paleta se ha adaptado satisfactoriamente para la lectura diurna.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
 
     </main>
 

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=JetBrains+Mono:wght@400;600;700;800&display=swap');
+
 * {
   box-sizing: border-box;
 }
@@ -7,4 +9,8 @@ body,
 #root {
   margin: 0;
   min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
 }
