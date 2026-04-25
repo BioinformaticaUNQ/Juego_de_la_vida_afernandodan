@@ -1,50 +1,56 @@
-import { CODON_TO_AA, DIFFICULTY_PROFILES, GAME_CONFIG } from './data'
-
-const BASE_PAIRS = {
-  A: 'U',
-  U: 'A',
-  C: 'G',
-  G: 'C',
-}
-
-const codonKeys = Object.keys(CODON_TO_AA)
+import { CODON_KEYS, CODON_TABLE, DIFFICULTY_PROFILES, GAME_CONFIG, getAnticodon } from './data'
 
 const createId = (prefix) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 100000)}`
 
-const randomCodon = () => codonKeys[Math.floor(Math.random() * codonKeys.length)]
+const randomCodon = () => CODON_KEYS[Math.floor(Math.random() * CODON_KEYS.length)]
 
-export const getAnticodon = (codon) => codon.split('').map((base) => BASE_PAIRS[base]).join('')
+const shuffle = (items) => {
+  const copy = [...items]
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = copy[i]
+    copy[i] = copy[j]
+    copy[j] = temp
+  }
+  return copy
+}
 
 const makeSequence = () => {
   const sequence = ['AUG']
-  for (let i = 0; i < GAME_CONFIG.levelLength - 1; i += 1) {
+  for (let i = 0; i < GAME_CONFIG.sequenceLength - 1; i += 1) {
     sequence.push(randomCodon())
   }
   return sequence
 }
 
-const createCard = (type, value) => ({
-  id: createId('card'),
-  type,
-  value,
-})
+const makeCard = (anticodon, isCorrect = false) => {
+  const codon = anticodon.split('').map((base) => getAnticodon(base)).join('')
+  const aminoData = CODON_TABLE[codon] || CODON_TABLE.AUG
 
-const makeDeck = (type, requiredValue, size) => {
-  const deck = [createCard(type, requiredValue)]
-  while (deck.length < size) {
-    const random = randomCodon()
-    const value = type === 'trna' ? getAnticodon(random) : CODON_TO_AA[random]
-    deck.push(createCard(type, value))
+  return {
+    id: createId('trna'),
+    anticodon,
+    amino: aminoData.amino,
+    color: aminoData.color,
+    isCorrect,
+  }
+}
+
+const buildPool = (codon, poolSize) => {
+  const requiredAnti = getAnticodon(codon)
+  const seen = new Set([requiredAnti])
+  const cards = [makeCard(requiredAnti, true)]
+
+  while (cards.length < poolSize) {
+    const distractor = getAnticodon(randomCodon())
+    if (seen.has(distractor)) {
+      continue
+    }
+    seen.add(distractor)
+    cards.push(makeCard(distractor, false))
   }
 
-  for (let i = deck.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1))
-    const temp = deck[i]
-    deck[i] = deck[j]
-    deck[j] = temp
-  }
-
-  return deck
+  return shuffle(cards)
 }
 
 const createToast = (type, message) => ({
@@ -58,89 +64,126 @@ const addToast = (state, type, message) => ({
   toasts: [createToast(type, message), ...state.toasts].slice(0, GAME_CONFIG.maxToasts),
 })
 
-const setFeedback = (state, type) => ({
+const withFeedback = (state, type, message) => ({
   ...state,
   feedback: {
     type,
+    message,
     token: state.feedback.token + 1,
   },
 })
 
-const withNewDecks = (state, codon = state.currentCodon) => {
-  if (!codon) {
-    return state
-  }
+const translocateSlots = (slots, aPayload) => ({
+  e: slots.p,
+  p: aPayload,
+  a: null,
+})
 
-  const profile = DIFFICULTY_PROFILES[state.difficulty]
-  return {
-    ...state,
-    trnaDeck: makeDeck('trna', getAnticodon(codon), profile.deckSize),
-    aaDeck: makeDeck('aa', CODON_TO_AA[codon], profile.deckSize),
-    selected: {
-      trna: null,
-      aa: null,
-    },
-  }
-}
-
-const advanceCodon = (state) => {
-  const nextIndex = state.currentCodonIndex + 1
+const nextStateForCodon = (state, nextIndex) => {
   if (nextIndex >= state.sequence.length) {
     return {
       ...state,
-      currentCodonIndex: nextIndex,
-      currentCodon: null,
       isRunning: false,
-      trnaDeck: [],
-      aaDeck: [],
-      selected: {
-        trna: null,
-        aa: null,
-      },
+      currentCodon: null,
+      currentCodonIndex: nextIndex,
+      remainingMs: 0,
+      trnaPool: [],
     }
   }
 
   const profile = DIFFICULTY_PROFILES[state.difficulty]
-  const nextCodon = state.sequence[nextIndex]
-  return withNewDecks({
+  const currentCodon = state.sequence[nextIndex]
+
+  return {
     ...state,
+    currentCodon,
     currentCodonIndex: nextIndex,
-    currentCodon: nextCodon,
-    remainingMs: profile.timePerCodonMs,
-    codonLives: GAME_CONFIG.codonLives,
-  }, nextCodon)
+    remainingMs: profile.timerMs,
+    trnaPool: buildPool(currentCodon, profile.poolSize),
+  }
 }
 
-const isCraftCorrect = (state) => {
-  if (!state.selected.trna || !state.selected.aa || !state.currentCodon) {
-    return false
+const resolveAttempt = (state, card, reason) => {
+  if (!state.isRunning || !state.currentCodon) {
+    return state
   }
 
-  const requiredAnti = getAnticodon(state.currentCodon)
-  const requiredAA = CODON_TO_AA[state.currentCodon]
+  const profile = DIFFICULTY_PROFILES[state.difficulty]
+  const expectedAnti = getAnticodon(state.currentCodon)
+  const expectedData = CODON_TABLE[state.currentCodon]
+  const success = Boolean(card && card.anticodon === expectedAnti)
 
-  return state.selected.trna.value === requiredAnti && state.selected.aa.value === requiredAA
+  let nextState = state
+
+  if (success) {
+    const gained = Math.round((90 + state.combo * 25) * profile.scoreMult)
+    const aPayload = {
+      amino: expectedData.amino,
+      color: expectedData.color,
+      anticodon: expectedAnti,
+      codon: state.currentCodon,
+    }
+
+    nextState = {
+      ...nextState,
+      score: nextState.score + gained,
+      combo: nextState.combo + 1,
+      bestCombo: Math.max(nextState.bestCombo, nextState.combo + 1),
+      chain: [...nextState.chain, aPayload],
+      slots: translocateSlots(nextState.slots, aPayload),
+    }
+    nextState = addToast(nextState, 'success', `Correcto +${gained}`)
+    nextState = withFeedback(nextState, 'success', `+${nextState.combo} combo`)
+  } else {
+    const penalty = reason === 'timeout' ? Math.round(profile.missPenalty * 1.2) : profile.missPenalty
+    nextState = {
+      ...nextState,
+      score: Math.max(0, nextState.score - penalty),
+      combo: 0,
+      slots: translocateSlots(nextState.slots, null),
+    }
+
+    if (reason === 'timeout') {
+      nextState = addToast(nextState, 'warn', `Timeout en ${state.currentCodon}`)
+      nextState = withFeedback(nextState, 'timeout', 'Tiempo agotado')
+    } else {
+      nextState = addToast(nextState, 'error', 'Anticodon incorrecto')
+      nextState = withFeedback(nextState, 'error', '-combo')
+    }
+  }
+
+  nextState = nextStateForCodon(nextState, state.currentCodonIndex + 1)
+
+  if (!nextState.isRunning) {
+    nextState = addToast(nextState, 'info', `Fin de ronda. Score ${nextState.score}`)
+    nextState = withFeedback(nextState, 'idle', 'Ronda completa')
+  }
+
+  return nextState
 }
 
 export const createInitialGameState = () => ({
   isRunning: false,
   difficulty: 'normal',
-  score: 0,
   sequence: [],
-  currentCodonIndex: 0,
   currentCodon: null,
-  remainingMs: DIFFICULTY_PROFILES.normal.timePerCodonMs,
-  codonLives: GAME_CONFIG.codonLives,
-  trnaDeck: [],
-  aaDeck: [],
-  selected: {
-    trna: null,
-    aa: null,
+  currentCodonIndex: 0,
+  remainingMs: DIFFICULTY_PROFILES.normal.timerMs,
+  trnaPool: [],
+  slots: {
+    e: null,
+    p: null,
+    a: null,
   },
+  chain: [],
+  score: 0,
+  combo: 0,
+  bestCombo: 0,
   manualOpen: false,
   toasts: [],
   feedback: {
     type: 'idle',
+    message: '',
     token: 0,
   },
 })
@@ -148,38 +191,41 @@ export const createInitialGameState = () => ({
 export const gameReducer = (state, action) => {
   switch (action.type) {
     case 'SET_DIFFICULTY': {
-      const profile = DIFFICULTY_PROFILES[action.payload] || DIFFICULTY_PROFILES.normal
-      const updated = {
+      const nextDifficulty = DIFFICULTY_PROFILES[action.payload] ? action.payload : 'normal'
+      const profile = DIFFICULTY_PROFILES[nextDifficulty]
+      return addToast({
         ...state,
-        difficulty: action.payload,
-        remainingMs: profile.timePerCodonMs,
-      }
-      return addToast(updated, 'info', `${profile.label}: ${Math.floor(profile.timePerCodonMs / 1000)}s, mazo ${profile.deckSize}`)
+        difficulty: nextDifficulty,
+        remainingMs: profile.timerMs,
+      }, 'info', `${profile.label}: ${Math.floor(profile.timerMs / 1000)}s, pool ${profile.poolSize}`)
     }
 
     case 'START_GAME': {
       const profile = DIFFICULTY_PROFILES[state.difficulty]
       const sequence = makeSequence()
-      const firstCodon = sequence[0]
+      const currentCodon = sequence[0]
 
       let nextState = {
         ...state,
         isRunning: true,
-        score: 0,
         sequence,
+        currentCodon,
         currentCodonIndex: 0,
-        currentCodon: firstCodon,
-        remainingMs: profile.timePerCodonMs,
-        codonLives: GAME_CONFIG.codonLives,
-        selected: {
-          trna: null,
-          aa: null,
+        remainingMs: profile.timerMs,
+        trnaPool: buildPool(currentCodon, profile.poolSize),
+        slots: {
+          e: null,
+          p: null,
+          a: null,
         },
+        chain: [],
+        score: 0,
+        combo: 0,
+        bestCombo: 0,
       }
 
-      nextState = withNewDecks(nextState, firstCodon)
-      nextState = addToast(nextState, 'success', `Ronda iniciada en ${profile.label}`)
-      return setFeedback(nextState, 'success')
+      nextState = addToast(nextState, 'success', `Inicia ronda ${profile.label}`)
+      return withFeedback(nextState, 'success', 'Traduccion iniciada')
     }
 
     case 'TICK': {
@@ -195,105 +241,36 @@ export const gameReducer = (state, action) => {
         }
       }
 
-      let failed = addToast({
+      return resolveAttempt({
         ...state,
         remainingMs: 0,
-      }, 'error', `Se agoto el tiempo del codon ${state.currentCodon}`)
-
-      failed = setFeedback(failed, 'error')
-      failed = advanceCodon(failed)
-
-      if (!failed.isRunning) {
-        return addToast(failed, 'warn', `Juego terminado. Puntaje final ${Math.round(failed.score)}`)
-      }
-
-      return addToast(failed, 'warn', `Siguiente codon: ${failed.currentCodon}`)
+      }, null, 'timeout')
     }
 
-    case 'DROP_CARD': {
+    case 'DROP_TRNA': {
       if (!state.isRunning || !state.currentCodon) {
         return state
       }
 
-      const { sourceType, cardId, target } = action
-      if (!['trna', 'aa'].includes(sourceType) || !['trna', 'aa'].includes(target)) {
-        return state
-      }
-
-      const deck = sourceType === 'trna' ? state.trnaDeck : state.aaDeck
-      const card = deck.find((entry) => entry.id === cardId)
+      const card = state.trnaPool.find((entry) => entry.id === action.cardId)
       if (!card) {
         return state
       }
 
-      if (card.type !== target) {
-        const warned = addToast(state, 'warn', 'Tipo de carta incorrecto para ese espacio')
-        return setFeedback(warned, 'error')
-      }
-
-      return {
+      const staged = {
         ...state,
-        selected: {
-          ...state.selected,
-          [target]: card,
+        slots: {
+          ...state.slots,
+          a: {
+            amino: card.amino,
+            color: card.color,
+            anticodon: card.anticodon,
+            codon: state.currentCodon,
+          },
         },
       }
-    }
 
-    case 'CRAFT': {
-      if (!state.isRunning || !state.currentCodon) {
-        return state
-      }
-
-      if (!state.selected.trna || !state.selected.aa) {
-        return addToast(state, 'warn', 'Arrastra un ARNt y un aminoacido al centro')
-      }
-
-      if (isCraftCorrect(state)) {
-        const profile = DIFFICULTY_PROFILES[state.difficulty]
-        const lifePercent = (state.remainingMs / profile.timePerCodonMs) * 100
-        const gained = Math.round(lifePercent * profile.scoreFactor)
-
-        let successState = {
-          ...state,
-          score: state.score + gained,
-        }
-        successState = addToast(successState, 'success', `Correcto +${gained} pts (${Math.round(lifePercent)}% vida)`)
-        successState = setFeedback(successState, 'success')
-        successState = advanceCodon(successState)
-
-        if (!successState.isRunning) {
-          return addToast(successState, 'success', `Juego terminado. Puntaje final ${Math.round(successState.score)}`)
-        }
-
-        return successState
-      }
-
-      const nextLives = state.codonLives - 1
-      const halvedTime = Math.max(1000, Math.floor(state.remainingMs / 2))
-
-      let failedState = {
-        ...state,
-        codonLives: nextLives,
-        remainingMs: halvedTime,
-      }
-
-      failedState = withNewDecks(failedState)
-      failedState = addToast(failedState, 'error', `Fallo de crafteo. Vidas restantes: ${Math.max(nextLives, 0)}`)
-      failedState = setFeedback(failedState, 'error')
-
-      if (nextLives > 0) {
-        return failedState
-      }
-
-      let codonFailed = addToast(failedState, 'warn', `Perdiste el codon ${state.currentCodon}`)
-      codonFailed = advanceCodon(codonFailed)
-
-      if (!codonFailed.isRunning) {
-        return addToast(codonFailed, 'warn', `Juego terminado. Puntaje final ${Math.round(codonFailed.score)}`)
-      }
-
-      return codonFailed
+      return resolveAttempt(staged, card, 'drop')
     }
 
     case 'TOGGLE_MANUAL': {
