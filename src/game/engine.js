@@ -1,8 +1,17 @@
-import { CODON_KEYS, CODON_TABLE, DIFFICULTY_PROFILES, GAME_CONFIG, getAnticodon } from './data'
+import {
+  CODON_KEYS,
+  CODON_TABLE,
+  DIFFICULTY_PROFILES,
+  GAME_CONFIG,
+  STOP_CODONS,
+  getAnticodon,
+  getQualityByErrorRate,
+} from './data'
 
 const createId = (prefix) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 100000)}`
 
 const randomCodon = () => CODON_KEYS[Math.floor(Math.random() * CODON_KEYS.length)]
+const randomStopCodon = () => STOP_CODONS[Math.floor(Math.random() * STOP_CODONS.length)]
 
 const shuffle = (items) => {
   const copy = [...items]
@@ -15,11 +24,13 @@ const shuffle = (items) => {
   return copy
 }
 
-const makeSequence = () => {
+const makeSequence = (profile, level = 1) => {
+  const codingLength = profile.sequenceBaseLength + Math.max(0, (level - 1) * GAME_CONFIG.levelLengthStep)
   const sequence = ['AUG']
-  for (let i = 0; i < GAME_CONFIG.sequenceLength - 1; i += 1) {
+  for (let i = 0; i < codingLength - 1; i += 1) {
     sequence.push(randomCodon())
   }
+  sequence.push(randomStopCodon())
   return sequence
 }
 
@@ -79,28 +90,164 @@ const translocateSlots = (slots, aPayload) => ({
   a: null,
 })
 
-const nextStateForCodon = (state, nextIndex) => {
-  if (nextIndex >= state.sequence.length) {
-    return {
-      ...state,
-      isRunning: false,
-      currentCodon: null,
-      currentCodonIndex: nextIndex,
-      remainingMs: 0,
-      trnaPool: [],
-    }
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
+
+const getTimerForProgress = (state) => {
+  const profile = DIFFICULTY_PROFILES[state.difficulty]
+  const total = Math.max(1, state.sequence.length - 1)
+  const progress = clamp(state.translatedCodons / total, 0, 1)
+  return Math.round(profile.timerMaxMs + (profile.timerMinMs - profile.timerMaxMs) * progress)
+}
+
+const evaluateLevel = (state) => {
+  const length = state.chain.length
+  const totalLength = Math.max(1, state.translatedCodons)
+  const errors = state.errors
+  const errorRate = errors / totalLength
+  const success = errorRate <= GAME_CONFIG.successThreshold
+  const quality = getQualityByErrorRate(errorRate)
+
+  return {
+    length,
+    errors,
+    errorRate,
+    quality,
+    score: state.score,
+    success,
+  }
+}
+
+const finishTranslation = (state) => {
+  const result = evaluateLevel(state)
+  const summary = result.success ? `Exito ${result.quality}` : `Fallo ${result.quality}`
+
+  let nextState = {
+    ...state,
+    isRunning: false,
+    isPaused: false,
+    currentCodon: null,
+    remainingMs: 0,
+    trnaPool: [],
+    levelResult: result,
   }
 
-  const profile = DIFFICULTY_PROFILES[state.difficulty]
-  const currentCodon = state.sequence[nextIndex]
+  nextState = addToast(nextState, result.success ? 'success' : 'error', summary)
+  nextState = withFeedback(nextState, result.success ? 'success' : 'error', summary)
+  return nextState
+}
+
+const moveToIndex = (state, nextIndex) => {
+  if (nextIndex >= state.sequence.length) {
+    return finishTranslation(state)
+  }
+
+  const nextCodon = state.sequence[nextIndex]
+  if (STOP_CODONS.includes(nextCodon)) {
+    return finishTranslation({
+      ...state,
+      currentCodonIndex: nextIndex,
+      currentCodon: nextCodon,
+    })
+  }
 
   return {
     ...state,
-    currentCodon,
+    currentCodon: nextCodon,
     currentCodonIndex: nextIndex,
-    remainingMs: profile.timerMs,
-    trnaPool: buildPool(currentCodon, profile.poolSize),
+    remainingMs: getTimerForProgress(state),
+    trnaPool: buildPool(nextCodon, DIFFICULTY_PROFILES[state.difficulty].poolSize),
   }
+}
+
+const applyCorrect = (state, expectedAnti, expectedData) => {
+  const profile = DIFFICULTY_PROFILES[state.difficulty]
+  const baseValue = 100
+  const comboBonus = state.combo * 15
+  const gained = Math.round((baseValue + comboBonus) * profile.scoreMult)
+
+  const payload = {
+    aminoacid: expectedData.amino,
+    color: expectedData.color,
+    isError: false,
+    codon: state.currentCodon,
+    anticodon: expectedAnti,
+  }
+
+  let nextState = {
+    ...state,
+    score: state.score + gained,
+    combo: state.combo + 1,
+    bestCombo: Math.max(state.bestCombo, state.combo + 1),
+    chain: [...state.chain, payload],
+    slots: translocateSlots(state.slots, payload),
+    translatedCodons: state.translatedCodons + 1,
+  }
+
+  nextState = addToast(nextState, 'success', 'Acierto')
+  nextState = withFeedback(nextState, 'success', '+combo')
+  return nextState
+}
+
+const applyTimeout = (state) => {
+  const profile = DIFFICULTY_PROFILES[state.difficulty]
+
+  let nextState = {
+    ...state,
+    score: Math.max(0, state.score - profile.missPenalty),
+    combo: 0,
+    errors: state.errors + 1,
+    misses: state.misses + 1,
+    translatedCodons: state.translatedCodons + 1,
+    slots: translocateSlots(state.slots, null),
+  }
+
+  nextState = addToast(nextState, 'warn', 'Timeout')
+  nextState = withFeedback(nextState, 'timeout', 'Tiempo agotado')
+  return nextState
+}
+
+const applyIncorrect = (state, card) => {
+  const profile = DIFFICULTY_PROFILES[state.difficulty]
+  const rejected = Math.random() < profile.rejectRate
+
+  if (rejected) {
+    let nextState = {
+      ...state,
+      score: Math.max(0, state.score - Math.round(profile.errorPenalty * 0.7)),
+      combo: 0,
+      errors: state.errors + 1,
+      rejections: state.rejections + 1,
+      translatedCodons: state.translatedCodons + 1,
+      slots: translocateSlots(state.slots, null),
+    }
+
+    nextState = addToast(nextState, 'error', 'Rechazo')
+    nextState = withFeedback(nextState, 'error', 'Rechazo')
+    return nextState
+  }
+
+  const wrongPayload = {
+    aminoacid: card.amino,
+    color: card.color,
+    isError: true,
+    codon: state.currentCodon,
+    anticodon: card.anticodon,
+  }
+
+  let nextState = {
+    ...state,
+    score: Math.max(0, state.score - profile.errorPenalty),
+    combo: 0,
+    errors: state.errors + 1,
+    misincorporations: state.misincorporations + 1,
+    translatedCodons: state.translatedCodons + 1,
+    chain: [...state.chain, wrongPayload],
+    slots: translocateSlots(state.slots, wrongPayload),
+  }
+
+  nextState = addToast(nextState, 'error', 'Misincorporacion')
+  nextState = withFeedback(nextState, 'error', 'Error')
+  return nextState
 }
 
 const resolveAttempt = (state, card, reason) => {
@@ -108,67 +255,28 @@ const resolveAttempt = (state, card, reason) => {
     return state
   }
 
-  const profile = DIFFICULTY_PROFILES[state.difficulty]
   const expectedAnti = getAnticodon(state.currentCodon)
   const expectedData = CODON_TABLE[state.currentCodon]
   const success = Boolean(card && card.anticodon === expectedAnti)
 
   let nextState = state
 
-  if (success) {
-    const gained = Math.round((90 + state.combo * 25) * profile.scoreMult)
-    const aPayload = {
-      amino: expectedData.amino,
-      color: expectedData.color,
-      anticodon: expectedAnti,
-      codon: state.currentCodon,
-    }
-
-    nextState = {
-      ...nextState,
-      score: nextState.score + gained,
-      combo: nextState.combo + 1,
-      bestCombo: Math.max(nextState.bestCombo, nextState.combo + 1),
-      chain: [...nextState.chain, aPayload],
-      slots: translocateSlots(nextState.slots, aPayload),
-    }
-    nextState = addToast(nextState, 'success', `Correcto +${gained}`)
-    nextState = withFeedback(nextState, 'success', `+${nextState.combo} combo`)
+  if (reason === 'timeout') {
+    nextState = applyTimeout(nextState)
+  } else if (success) {
+    nextState = applyCorrect(nextState, expectedAnti, expectedData)
   } else {
-    const penalty = reason === 'timeout' ? Math.round(profile.missPenalty * 1.2) : profile.missPenalty
-    nextState = {
-      ...nextState,
-      score: Math.max(0, nextState.score - penalty),
-      combo: 0,
-      slots: translocateSlots(nextState.slots, null),
-    }
-
-    if (reason === 'timeout') {
-      nextState = addToast(nextState, 'warn', `Timeout en ${state.currentCodon}`)
-      nextState = withFeedback(nextState, 'timeout', 'Tiempo agotado')
-    } else {
-      nextState = addToast(nextState, 'error', 'Anticodon incorrecto')
-      nextState = withFeedback(nextState, 'error', '-combo')
-    }
+    nextState = applyIncorrect(nextState, card)
   }
 
-  nextState = nextStateForCodon(nextState, state.currentCodonIndex + 1)
-
-  if (!nextState.isRunning) {
-    nextState = addToast(nextState, 'info', `Fin de ronda. Score ${nextState.score}`)
-    nextState = withFeedback(nextState, 'idle', 'Ronda completa')
-  }
-
-  return nextState
+  return moveToIndex(nextState, state.currentCodonIndex + 1)
 }
 
-export const createInitialGameState = () => ({
-  isRunning: false,
-  difficulty: 'normal',
+const createCoreState = () => ({
   sequence: [],
   currentCodon: null,
   currentCodonIndex: 0,
-  remainingMs: DIFFICULTY_PROFILES.normal.timerMs,
+  remainingMs: DIFFICULTY_PROFILES.normal.timerMaxMs,
   trnaPool: [],
   slots: {
     e: null,
@@ -176,9 +284,22 @@ export const createInitialGameState = () => ({
     a: null,
   },
   chain: [],
+  translatedCodons: 0,
+  errors: 0,
+  misses: 0,
+  rejections: 0,
+  misincorporations: 0,
   score: 0,
   combo: 0,
   bestCombo: 0,
+  levelResult: null,
+})
+
+export const createInitialGameState = () => ({
+  isRunning: false,
+  isPaused: false,
+  difficulty: 'normal',
+  level: 1,
   manualOpen: false,
   toasts: [],
   feedback: {
@@ -186,7 +307,31 @@ export const createInitialGameState = () => ({
     message: '',
     token: 0,
   },
+  ...createCoreState(),
 })
+
+const startLevel = (state, level = state.level) => {
+  const profile = DIFFICULTY_PROFILES[state.difficulty]
+  const sequence = makeSequence(profile, level)
+  const firstCodon = sequence[0]
+
+  let nextState = {
+    ...state,
+    ...createCoreState(),
+    isRunning: true,
+    isPaused: false,
+    level,
+    sequence,
+    currentCodon: firstCodon,
+    currentCodonIndex: 0,
+    remainingMs: profile.timerMaxMs,
+    trnaPool: buildPool(firstCodon, profile.poolSize),
+  }
+
+  nextState = addToast(nextState, 'success', `Nivel ${level}`)
+  nextState = withFeedback(nextState, 'success', 'Inicio')
+  return nextState
+}
 
 export const gameReducer = (state, action) => {
   switch (action.type) {
@@ -196,40 +341,20 @@ export const gameReducer = (state, action) => {
       return addToast({
         ...state,
         difficulty: nextDifficulty,
-        remainingMs: profile.timerMs,
-      }, 'info', `${profile.label}: ${Math.floor(profile.timerMs / 1000)}s, pool ${profile.poolSize}`)
+        remainingMs: profile.timerMaxMs,
+      }, 'info', `${profile.label}: ${profile.timerMinMs}-${profile.timerMaxMs}ms | cadena ${profile.sequenceBaseLength}`)
     }
 
     case 'START_GAME': {
-      const profile = DIFFICULTY_PROFILES[state.difficulty]
-      const sequence = makeSequence()
-      const currentCodon = sequence[0]
+      return startLevel(state, state.level)
+    }
 
-      let nextState = {
-        ...state,
-        isRunning: true,
-        sequence,
-        currentCodon,
-        currentCodonIndex: 0,
-        remainingMs: profile.timerMs,
-        trnaPool: buildPool(currentCodon, profile.poolSize),
-        slots: {
-          e: null,
-          p: null,
-          a: null,
-        },
-        chain: [],
-        score: 0,
-        combo: 0,
-        bestCombo: 0,
-      }
-
-      nextState = addToast(nextState, 'success', `Inicia ronda ${profile.label}`)
-      return withFeedback(nextState, 'success', 'Traduccion iniciada')
+    case 'START_NEXT_LEVEL': {
+      return startLevel(state, state.level + 1)
     }
 
     case 'TICK': {
-      if (!state.isRunning || !state.currentCodon) {
+      if (!state.isRunning || state.isPaused || !state.currentCodon) {
         return state
       }
 
@@ -248,7 +373,7 @@ export const gameReducer = (state, action) => {
     }
 
     case 'DROP_TRNA': {
-      if (!state.isRunning || !state.currentCodon) {
+      if (!state.isRunning || state.isPaused || !state.currentCodon) {
         return state
       }
 
@@ -262,10 +387,11 @@ export const gameReducer = (state, action) => {
         slots: {
           ...state.slots,
           a: {
-            amino: card.amino,
+            aminoacid: card.amino,
             color: card.color,
-            anticodon: card.anticodon,
+            isError: !card.isCorrect,
             codon: state.currentCodon,
+            anticodon: card.anticodon,
           },
         },
       }
@@ -278,6 +404,22 @@ export const gameReducer = (state, action) => {
         ...state,
         manualOpen: !state.manualOpen,
       }
+    }
+
+    case 'TOGGLE_PAUSE': {
+      if (!state.isRunning) {
+        return state
+      }
+
+      const paused = !state.isPaused
+      let nextState = {
+        ...state,
+        isPaused: paused,
+      }
+
+      nextState = addToast(nextState, 'info', paused ? 'Pausa' : 'Reanudado')
+      nextState = withFeedback(nextState, 'info', paused ? 'Pausa' : 'Reanudado')
+      return nextState
     }
 
     case 'DISMISS_TOAST': {
