@@ -342,15 +342,22 @@ export const gameReducer = (state, action) => {
     case 'SET_DIFFICULTY': {
       const nextDifficulty = DIFFICULTY_PROFILES[action.payload] ? action.payload : 'normal'
       const profile = DIFFICULTY_PROFILES[nextDifficulty]
-      return addToast({
-        ...state,
-        difficulty: nextDifficulty,
-        remainingMs: profile.timerMaxMs,
-      }, 'info', `${profile.label}: ${profile.timerMinMs}-${profile.timerMaxMs}ms | cadena ${profile.sequenceBaseLength}`)
+      // Resetear todo al estado inicial con la nueva dificultad, sin iniciar el juego
+      const initialState = createInitialGameState()
+      initialState.difficulty = nextDifficulty
+      initialState.remainingMs = profile.timerMaxMs
+      return addToast(initialState, 'info', `Dificultad: ${profile.label}`)
     }
 
     case 'START_GAME': {
       return startLevel(state, state.level)
+    }
+
+    case 'RESTART_GAME': {
+      // Reiniciar completamente al estado inicial sin iniciar el juego
+      const initialState = createInitialGameState()
+      initialState.difficulty = state.difficulty
+      return initialState
     }
 
     case 'START_NEXT_LEVEL': {

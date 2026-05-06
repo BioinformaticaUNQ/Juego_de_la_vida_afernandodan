@@ -11,8 +11,5 @@ npm install
 npm run dev
 ```
 
-## Build
-
-```bash
-npm run build
+Ingresar en http://localhost:5173/
 ```

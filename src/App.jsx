@@ -251,11 +251,11 @@ function App() {
             >
               {Object.entries(DIFFICULTY_PROFILES).map(([key, profile]) => (
                 <option key={key} value={key}>
-                  {profile.label} ({profile.timerMinMs / 1000}-{profile.timerMaxMs / 1000}s / {profile.poolSize} cartas / entrada {profile.incomingCodonWindow})
+                  {profile.label} ({profile.timerMinMs / 1000}-{profile.timerMaxMs / 1000}s / {profile.poolSize} ARNt's / entrada {profile.incomingCodonWindow})
                 </option>
               ))}
             </select>
-            <button type="button" className="btn primary" onClick={() => dispatch({ type: 'START_GAME' })}>
+            <button type="button" className="btn primary" onClick={() => dispatch({ type: state.isRunning ? 'RESTART_GAME' : 'START_GAME' })}>
               {state.isRunning ? 'Reiniciar' : 'Iniciar'}
             </button>
             <button
@@ -395,21 +395,23 @@ function App() {
 
       {state.gameGuideOpen && (
         <ManualModal
-          title="Manual básico del juego"
+          title="¿Cómo Jugar?"
           subtitle="Reglas y objetivo principal."
           onClose={() => dispatch({ type: 'TOGGLE_GAME_GUIDE' })}
         >
           <section className="manual-guide-body">
-            <p><strong>Objetivo:</strong> completar la traduccion hasta un codon STOP antes de que se agote el tiempo, con la menor cantidad de errores posible.</p>
+            <p><strong>Objetivo:</strong> completar la traduccion de la cadena hasta un codon STOP antes de que se agote el tiempo, con la menor cantidad de errores posible.</p>
+            La dificultad afecta el tiempo disponible para traducir cada codon, la cantidad de ARNt's entre los disponibles, la ventana de codones entrantes.
             <h3>Como jugar</h3>
             <ul>
               <li>Arrastra el ARNt correcto al sitio A.</li>
-              <li>Haz match entre anticodon y codon activo.</li>
+              <li>El anticodon debe coincidir con el codon activo.</li>
               <li>Cada acierto suma cadena y puntos.</li>
               <li>Evita errores: bajan calidad y puntaje.</li>
               <li>Objetivo: llegar al STOP antes del tiempo.</li>
             </ul>
           </section>
+          <p></p>
         </ManualModal>
       )}
 
