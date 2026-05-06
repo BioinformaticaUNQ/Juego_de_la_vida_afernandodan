@@ -3,6 +3,7 @@ import {
   CODON_TABLE,
   DIFFICULTY_PROFILES,
   GAME_CONFIG,
+  GENETIC_CODE,
   STOP_CODONS,
   getAnticodon,
   getQualityByErrorRate,
@@ -36,12 +37,14 @@ const makeSequence = (profile, level = 1) => {
 
 const makeCard = (anticodon, isCorrect = false) => {
   const codon = anticodon.split('').map((base) => getAnticodon(base)).join('')
+  const geneticInfo = GENETIC_CODE[codon]
   const aminoData = CODON_TABLE[codon] || CODON_TABLE.AUG
 
   return {
     id: createId('trna'),
     anticodon,
     amino: aminoData.amino,
+    name: geneticInfo?.name || 'Unknown',
     color: aminoData.color,
     isCorrect,
   }
@@ -301,6 +304,7 @@ export const createInitialGameState = () => ({
   difficulty: 'normal',
   level: 1,
   manualOpen: false,
+  gameGuideOpen: false,
   toasts: [],
   feedback: {
     type: 'idle',
@@ -403,6 +407,13 @@ export const gameReducer = (state, action) => {
       return {
         ...state,
         manualOpen: !state.manualOpen,
+      }
+    }
+
+    case 'TOGGLE_GAME_GUIDE': {
+      return {
+        ...state,
+        gameGuideOpen: !state.gameGuideOpen,
       }
     }
 

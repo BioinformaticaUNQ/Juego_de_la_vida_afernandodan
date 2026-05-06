@@ -844,6 +844,7 @@ body::before {
 
 .manual-sheet {
   width: min(1480px, 97vw);
+  max-width: 50vw;
   height: auto;
   max-height: 94vh;
   overflow: hidden;
@@ -1009,6 +1010,20 @@ body::before {
 
 .manual-matrix-entry.manual-stop .matrix-aa {
   color: #c23030;
+}
+
+.manual-guide-body {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.56);
+  padding: 14px;
+  margin-top: 4px;
+}
+
+.manual-guide-body p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #2f241b;
 }
 
 .toast-stack {

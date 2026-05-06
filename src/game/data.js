@@ -6,25 +6,25 @@ export const BASE_PAIRS = {
 }
 
 export const GENETIC_CODE = {
-  UUU: { amino: 'Phe' }, UUC: { amino: 'Phe' }, UUA: { amino: 'Leu' }, UUG: { amino: 'Leu' },
-  UCU: { amino: 'Ser' }, UCC: { amino: 'Ser' }, UCA: { amino: 'Ser' }, UCG: { amino: 'Ser' },
-  UAU: { amino: 'Tyr' }, UAC: { amino: 'Tyr' }, UAA: { amino: 'STOP', isStop: true }, UAG: { amino: 'STOP', isStop: true },
-  UGU: { amino: 'Cys' }, UGC: { amino: 'Cys' }, UGA: { amino: 'STOP', isStop: true }, UGG: { amino: 'Trp' },
+  UUU: { amino: 'Phe', name: 'Fenilalanina' }, UUC: { amino: 'Phe', name: 'Fenilalanina' }, UUA: { amino: 'Leu', name: 'Leucina' }, UUG: { amino: 'Leu', name: 'Leucina' },
+  UCU: { amino: 'Ser', name: 'Serina' }, UCC: { amino: 'Ser', name: 'Serina' }, UCA: { amino: 'Ser', name: 'Serina' }, UCG: { amino: 'Ser', name: 'Serina' },
+  UAU: { amino: 'Tyr', name: 'Tirosina' }, UAC: { amino: 'Tyr', name: 'Tirosina' }, UAA: { amino: 'STOP', name: 'Codón de parada', isStop: true }, UAG: { amino: 'STOP', name: 'Codón de parada', isStop: true },
+  UGU: { amino: 'Cys', name: 'Cisteína' }, UGC: { amino: 'Cys', name: 'Cisteína' }, UGA: { amino: 'STOP', name: 'Codón de parada', isStop: true }, UGG: { amino: 'Trp', name: 'Triptófano' },
 
-  CUU: { amino: 'Leu' }, CUC: { amino: 'Leu' }, CUA: { amino: 'Leu' }, CUG: { amino: 'Leu' },
-  CCU: { amino: 'Pro' }, CCC: { amino: 'Pro' }, CCA: { amino: 'Pro' }, CCG: { amino: 'Pro' },
-  CAU: { amino: 'His' }, CAC: { amino: 'His' }, CAA: { amino: 'Gln' }, CAG: { amino: 'Gln' },
-  CGU: { amino: 'Arg' }, CGC: { amino: 'Arg' }, CGA: { amino: 'Arg' }, CGG: { amino: 'Arg' },
+  CUU: { amino: 'Leu', name: 'Leucina' }, CUC: { amino: 'Leu', name: 'Leucina' }, CUA: { amino: 'Leu', name: 'Leucina' }, CUG: { amino: 'Leu', name: 'Leucina' },
+  CCU: { amino: 'Pro', name: 'Prolina' }, CCC: { amino: 'Pro', name: 'Prolina' }, CCA: { amino: 'Pro', name: 'Prolina' }, CCG: { amino: 'Pro', name: 'Prolina' },
+  CAU: { amino: 'His', name: 'Histidina' }, CAC: { amino: 'His', name: 'Histidina' }, CAA: { amino: 'Gln', name: 'Glutamina' }, CAG: { amino: 'Gln', name: 'Glutamina' },
+  CGU: { amino: 'Arg', name: 'Arginina' }, CGC: { amino: 'Arg', name: 'Arginina' }, CGA: { amino: 'Arg', name: 'Arginina' }, CGG: { amino: 'Arg', name: 'Arginina' },
 
-  AUU: { amino: 'Ile' }, AUC: { amino: 'Ile' }, AUA: { amino: 'Ile' }, AUG: { amino: 'Met' },
-  ACU: { amino: 'Thr' }, ACC: { amino: 'Thr' }, ACA: { amino: 'Thr' }, ACG: { amino: 'Thr' },
-  AAU: { amino: 'Asn' }, AAC: { amino: 'Asn' }, AAA: { amino: 'Lys' }, AAG: { amino: 'Lys' },
-  AGU: { amino: 'Ser' }, AGC: { amino: 'Ser' }, AGA: { amino: 'Arg' }, AGG: { amino: 'Arg' },
+  AUU: { amino: 'Ile', name: 'Isoleucina' }, AUC: { amino: 'Ile', name: 'Isoleucina' }, AUA: { amino: 'Ile', name: 'Isoleucina' }, AUG: { amino: 'Met', name: 'Metionina' },
+  ACU: { amino: 'Thr', name: 'Treonina' }, ACC: { amino: 'Thr', name: 'Treonina' }, ACA: { amino: 'Thr', name: 'Treonina' }, ACG: { amino: 'Thr', name: 'Treonina' },
+  AAU: { amino: 'Asn', name: 'Asparagina' }, AAC: { amino: 'Asn', name: 'Asparagina' }, AAA: { amino: 'Lys', name: 'Lisina' }, AAG: { amino: 'Lys', name: 'Lisina' },
+  AGU: { amino: 'Ser', name: 'Serina' }, AGC: { amino: 'Ser', name: 'Serina' }, AGA: { amino: 'Arg', name: 'Arginina' }, AGG: { amino: 'Arg', name: 'Arginina' },
 
-  GUU: { amino: 'Val' }, GUC: { amino: 'Val' }, GUA: { amino: 'Val' }, GUG: { amino: 'Val' },
-  GCU: { amino: 'Ala' }, GCC: { amino: 'Ala' }, GCA: { amino: 'Ala' }, GCG: { amino: 'Ala' },
-  GAU: { amino: 'Asp' }, GAC: { amino: 'Asp' }, GAA: { amino: 'Glu' }, GAG: { amino: 'Glu' },
-  GGU: { amino: 'Gly' }, GGC: { amino: 'Gly' }, GGA: { amino: 'Gly' }, GGG: { amino: 'Gly' },
+  GUU: { amino: 'Val', name: 'Valina' }, GUC: { amino: 'Val', name: 'Valina' }, GUA: { amino: 'Val', name: 'Valina' }, GUG: { amino: 'Val', name: 'Valina' },
+  GCU: { amino: 'Ala', name: 'Alanina' }, GCC: { amino: 'Ala', name: 'Alanina' }, GCA: { amino: 'Ala', name: 'Alanina' }, GCG: { amino: 'Ala', name: 'Alanina' },
+  GAU: { amino: 'Asp', name: 'Ácido aspártico' }, GAC: { amino: 'Asp', name: 'Ácido aspártico' }, GAA: { amino: 'Glu', name: 'Ácido glutámico' }, GAG: { amino: 'Glu', name: 'Ácido glutámico' },
+  GGU: { amino: 'Gly', name: 'Glicina' }, GGC: { amino: 'Gly', name: 'Glicina' }, GGA: { amino: 'Gly', name: 'Glicina' }, GGG: { amino: 'Gly', name: 'Glicina' },
 }
 
 export const STOP_CODONS = Object.keys(GENETIC_CODE).filter((codon) => GENETIC_CODE[codon].isStop)

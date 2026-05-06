@@ -27,6 +27,21 @@ const qualityTheme = {
   degradada: 'quality-degradada',
 }
 
+const ManualModal = ({ title, subtitle, onClose, children }) => (
+  <div className="manual-backdrop" onClick={onClose}>
+    <section className="manual-sheet" onClick={(event) => event.stopPropagation()}>
+      <header className="manual-header-compact">
+        <div>
+          <h2>{title}</h2>
+          <p>{subtitle}</p>
+        </div>
+        <button type="button" className="btn" onClick={onClose}>Cerrar</button>
+      </header>
+      {children}
+    </section>
+  </div>
+)
+
 function App() {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialGameState)
   const audioContextRef = useRef(null)
@@ -254,6 +269,9 @@ function App() {
             <button type="button" className="btn" onClick={() => dispatch({ type: 'TOGGLE_MANUAL' })}>
               Código genético 🧬
             </button>
+            <button type="button" className="btn" onClick={() => dispatch({ type: 'TOGGLE_GAME_GUIDE' })}>
+              Manual básico
+            </button>
           </div>
         </article>
 
@@ -325,9 +343,9 @@ function App() {
             >
               <div className="trna-amino-top">
                 <span className="amino-dot" style={{ backgroundColor: card.color }} />
-                <span className="trna-amino-label">{card.amino}</span>
+                <span className="trna-amino-label">{card.name}</span>
               </div>
-              <div className="trna-icon">tRNA</div>
+              <div className="trna-icon">ARNt</div>
               <div className="trna-codon-label">{card.anticodon}</div>
             </article>
           ))}
@@ -335,49 +353,64 @@ function App() {
       </section>
 
       {state.manualOpen && (
-        <div className="manual-backdrop" onClick={() => dispatch({ type: 'TOGGLE_MANUAL' })}>
-          <section className="manual-sheet" onClick={(event) => event.stopPropagation()}>
-            <header className="manual-header-compact">
-              <div>
-                <h2>Código Genético 🧬</h2>
-                <p>Guía rápida de traducción y codones.</p>
-              </div>
-              <button type="button" className="btn" onClick={() => dispatch({ type: 'TOGGLE_MANUAL' })}>Cerrar</button>
-            </header>
+        <ManualModal
+          title="Código Genético 🧬"
+          subtitle="Guía rápida de traducción y codones."
+          onClose={() => dispatch({ type: 'TOGGLE_MANUAL' })}
+        >
 
-            <div className="manual-quickref">
-              <span><strong>AUG</strong> → <strong>UAC</strong> → Met</span>
-              <span><strong>STOP</strong> → UAA / UAG / UGA</span>
-              <span><strong>A / P / E</strong> → A es el unico drop</span>
-            </div>
+          <div className="manual-quickref">
+            <span><strong>AUG</strong> → <strong>UAC</strong> → Met</span>
+            <span><strong>STOP</strong> → UAA / UAG / UGA</span>
+            <span><strong>A / P / E</strong> → A es el unico drop</span>
+          </div>
 
-            <div className="manual-matrix">
-              <div className="manual-matrix-corner">1ra / 2da / 3ra</div>
-              {codonOrder.map((second) => (
-                <div key={`head-${second}`} className="manual-matrix-head">{second}</div>
-              ))}
+          <div className="manual-matrix">
+            <div className="manual-matrix-corner">1ra / 2da / 3ra</div>
+            {codonOrder.map((second) => (
+              <div key={`head-${second}`} className="manual-matrix-head">{second}</div>
+            ))}
 
-              {manualMatrix.map((row) => (
-                <Fragment key={row.first}>
-                  <div className="manual-matrix-rowhead">{row.first}</div>
-                  {row.columns.map((column) => (
-                    <div key={`cell-${row.first}-${column.second}`} className="manual-matrix-cell">
-                      {column.entries.map((entry) => (
-                        <div key={entry.codon} className={`manual-matrix-entry ${entry.isStop ? 'manual-stop' : ''}`.trim()}>
-                          <span className="matrix-codon">{entry.codon}</span>
-                          <span className="matrix-aa">
-                            <span className="amino-dot" style={{ backgroundColor: entry.color }} />
-                            {entry.amino}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </Fragment>
-              ))}
-            </div>
+            {manualMatrix.map((row) => (
+              <Fragment key={row.first}>
+                <div className="manual-matrix-rowhead">{row.first}</div>
+                {row.columns.map((column) => (
+                  <div key={`cell-${row.first}-${column.second}`} className="manual-matrix-cell">
+                    {column.entries.map((entry) => (
+                      <div key={entry.codon} className={`manual-matrix-entry ${entry.isStop ? 'manual-stop' : ''}`.trim()}>
+                        <span className="matrix-codon">{entry.codon}</span>
+                        <span className="matrix-aa">
+                          <span className="amino-dot" style={{ backgroundColor: entry.color }} />
+                          {entry.amino}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </Fragment>
+            ))}
+          </div>
+        </ManualModal>
+      )}
+
+      {state.gameGuideOpen && (
+        <ManualModal
+          title="Manual básico del juego"
+          subtitle="Reglas y objetivo principal."
+          onClose={() => dispatch({ type: 'TOGGLE_GAME_GUIDE' })}
+        >
+          <section className="manual-guide-body">
+            <p><strong>Objetivo:</strong> completar la traduccion hasta un codon STOP antes de que se agote el tiempo, con la menor cantidad de errores posible.</p>
+            <h3>Como jugar</h3>
+            <ul>
+              <li>Arrastra el ARNt correcto al sitio A.</li>
+              <li>Haz match entre anticodon y codon activo.</li>
+              <li>Cada acierto suma cadena y puntos.</li>
+              <li>Evita errores: bajan calidad y puntaje.</li>
+              <li>Objetivo: llegar al STOP antes del tiempo.</li>
+            </ul>
           </section>
-        </div>
+        </ManualModal>
       )}
 
       {state.levelResult && (
