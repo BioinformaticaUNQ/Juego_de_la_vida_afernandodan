@@ -122,7 +122,7 @@ const evaluateLevel = (state) => {
 
 const finishTranslation = (state) => {
   const result = evaluateLevel(state)
-  const summary = result.success ? `Exito ${result.quality}` : `Fallo ${result.quality}`
+  const summary = result.success ? 'Cadena polipeptídica válida' : 'Errores excesivos → síntesis abortada: péptido truncado.'
 
   let nextState = {
     ...state,

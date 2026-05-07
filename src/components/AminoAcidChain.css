@@ -1,0 +1,37 @@
+.amino-acid-chain {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem;
+  margin-top: .8rem;
+}
+
+.amino-acid-chain__node {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.amino-acid-chain__letter {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+  letter-spacing: .1rem;
+  font-family: 'Bebas Neue', monospace;
+}
+
+.amino-acid-chain__node.is-error {
+  box-shadow: 0 0 0 .2rem rgba(255, 102, 102, 0.55);
+}
+
+.amino-acid-chain__node:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px rgba(0, 224, 198, 0.6);
+  transition: all 0.2s ease;
+}

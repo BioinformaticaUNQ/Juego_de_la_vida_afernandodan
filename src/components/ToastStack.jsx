@@ -1,3 +1,5 @@
+import './ToastStack.css'
+
 function ToastStack({ toasts }) {
   const latestToast = toasts[0]
 

@@ -1,6 +1,9 @@
 import { Fragment, useEffect, useMemo, useReducer, useRef } from 'react'
 import './App.css'
-import ToastStack from './components/ToastStack'
+import GameBoard from './components/GameBoard'
+import GameHeader from './components/GameHeader'
+import ManualModal from './components/ManualModal'
+import ResultModal from './components/ResultModal'
 import { BASE_COLORS, CODON_TABLE, DIFFICULTY_PROFILES, GAME_CONFIG, GENETIC_CODE, getAnticodon } from './game/data'
 import { createInitialGameState, gameReducer } from './game/engine'
 
@@ -16,31 +19,7 @@ const renderCodon = (codon) => codon.split('').map((base, index) => (
   </span>
 ))
 
-const formatNumber = (value) => Intl.NumberFormat('en-US').format(Math.round(value))
-const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1)
 const codonOrder = ['U', 'C', 'A', 'G']
-
-const qualityTheme = {
-  perfecta: 'quality-perfecta',
-  funcional: 'quality-funcional',
-  defectuosa: 'quality-defectuosa',
-  degradada: 'quality-degradada',
-}
-
-const ManualModal = ({ title, subtitle, onClose, children }) => (
-  <div className="manual-backdrop" onClick={onClose}>
-    <section className="manual-sheet" onClick={(event) => event.stopPropagation()}>
-      <header className="manual-header-compact">
-        <div>
-          <h2>{title}</h2>
-          <p>{subtitle}</p>
-        </div>
-        <button type="button" className="btn" onClick={onClose}>Cerrar</button>
-      </header>
-      {children}
-    </section>
-  </div>
-)
 
 function App() {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialGameState)
@@ -125,7 +104,6 @@ function App() {
 
   const difficulty = DIFFICULTY_PROFILES[state.difficulty]
   const timerCap = Math.max(difficulty.timerMaxMs, 1)
-  const remainingPercent = Math.max(0, Math.min(100, (state.remainingMs / timerCap) * 100))
 
   const codonWindow = useMemo(() => {
     if (!state.sequence.length) {
@@ -169,196 +147,45 @@ function App() {
   )
 
   const chainPreview = useMemo(() => {
-    const previewSize = difficulty.chainGuideElements
-    const visibles = state.chain.slice(-previewSize)
-    const ghostCount = Math.max(0, previewSize - visibles.length)
-    return {
-      visibles,
-      ghostCount,
-    }
+    const visibles = state.chain // Sin reverse: nuevos van a la derecha
+    return { visibles }
   }, [state.chain])
-
-  const nextCodon = state.sequence[state.currentCodonIndex + 1] || '---'
-  const resultQualityClass = state.levelResult ? qualityTheme[state.levelResult.quality] || 'quality-degradada' : ''
-
-  const handleDragStart = (event, cardId) => {
-    event.dataTransfer.effectAllowed = 'copy'
-    event.dataTransfer.setData('text/plain', cardId)
-  }
-
-  const handleDropInA = (event) => {
-    event.preventDefault()
-    event.currentTarget.classList.remove('drag-over')
-
-    const cardId = event.dataTransfer.getData('text/plain')
-    if (!cardId) {
-      return
-    }
-
-    dispatch({ type: 'DROP_TRNA', cardId })
-  }
-
-  const allowDrop = (event) => {
-    event.preventDefault()
-    event.currentTarget.classList.add('drag-over')
-  }
-
-  const removeDropHighlight = (event) => {
-    event.currentTarget.classList.remove('drag-over')
-  }
 
   const feedbackClass = state.feedback.type === 'error' ? 'fx-shake' : state.feedback.type === 'timeout' ? 'fx-timeout' : ''
 
-  const renderSite = (label, key, payload, isDropZone = false) => (
-    <article
-      className={`site site-${key} ${isDropZone ? 'site-drop' : ''}`.trim()}
-      onDragOver={isDropZone ? allowDrop : undefined}
-      onDragLeave={isDropZone ? removeDropHighlight : undefined}
-      onDrop={isDropZone ? handleDropInA : undefined}
-    >
-      <span className="site-label">{label}</span>
-      {payload ? (
-        <div className="site-payload">
-          <strong>{payload.anticodon}</strong>
-          <small>{payload.amino}</small>
-        </div>
-      ) : (
-        <div className="site-empty">{isDropZone ? 'Insertar ANRT' : 'vacio'}</div>
-      )}
-    </article>
-  )
-
   return (
     <main className={`ribosome-game ${feedbackClass}`.trim()}>
-      <header className="hud-top">
-        <article className="hud-timer">
-          <div className="hud-title-row">
-            <span>Timer</span>
-            <span>{Math.ceil(state.remainingMs / 1000)}s</span>
-          </div>
-          <div className="timer-bar">
-            <div
-              className={`timer-fill ${remainingPercent < 33 ? 'danger' : remainingPercent < 66 ? 'warn' : ''}`.trim()}
-              style={{ width: `${remainingPercent}%` }}
-            />
-          </div>
-          <div className="controls">
-            <label htmlFor="difficulty">Dificultad</label>
-            <select
-              id="difficulty"
-              value={state.difficulty}
-              onChange={(event) => dispatch({ type: 'SET_DIFFICULTY', payload: event.target.value })}
-            >
-              {Object.entries(DIFFICULTY_PROFILES).map(([key, profile]) => (
-                <option key={key} value={key}>
-                  {profile.label} ({profile.timerMinMs / 1000}-{profile.timerMaxMs / 1000}s / {profile.poolSize} ARNt's / entrada {profile.incomingCodonWindow})
-                </option>
-              ))}
-            </select>
-            <button type="button" className="btn primary" onClick={() => dispatch({ type: state.isRunning ? 'RESTART_GAME' : 'START_GAME' })}>
-              {state.isRunning ? 'Reiniciar' : 'Iniciar'}
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => dispatch({ type: 'TOGGLE_PAUSE' })}
-              disabled={!state.isRunning}
-            >
-              {state.isPaused ? 'Reanudar' : 'Pausar'}
-            </button>
-            <button type="button" className="btn" onClick={() => dispatch({ type: 'TOGGLE_MANUAL' })}>
-              Código genético 🧬
-            </button>
-            <button type="button" className="btn" onClick={() => dispatch({ type: 'TOGGLE_GAME_GUIDE' })}>
-              Manual básico
-            </button>
-          </div>
-        </article>
+      <GameHeader
+        difficultyKey={state.difficulty}
+        difficultyProfiles={DIFFICULTY_PROFILES}
+        remainingMs={state.remainingMs}
+        timerCap={timerCap}
+        isRunning={state.isRunning}
+        isPaused={state.isPaused}
+        level={state.level}
+        score={state.score}
+        combo={state.combo}
+        bestCombo={state.bestCombo}
+        onDifficultyChange={(difficultyKey) => dispatch({ type: 'SET_DIFFICULTY', payload: difficultyKey })}
+        onPrimaryAction={() => dispatch({ type: state.isRunning ? 'RESTART_GAME' : 'START_GAME' })}
+        onPauseToggle={() => dispatch({ type: 'TOGGLE_PAUSE' })}
+        onToggleManual={() => dispatch({ type: 'TOGGLE_MANUAL' })}
+        onToggleGuide={() => dispatch({ type: 'TOGGLE_GAME_GUIDE' })}
+      />
 
-        <article className="hud-score">
-          <span className="level-chip">Nivel {state.level}</span>
-          <h2>Puntos</h2>
-          <strong>{formatNumber(state.score)}</strong>
-          <p>Combo x{state.combo}</p>
-          <small>Max x{state.bestCombo}</small>
-        </article>
-      </header>
-
-      <section className="stage-board">
-        <section className="chain-over-ribosome">
-          <h3>Cadena polipeptidica resultante</h3>
-          <div className="chain-track chain-track-top">
-            {chainPreview.visibles.map((node, index) => (
-              <div
-                key={`${node.aminoacid}-${index}`}
-                className={`chain-node ${node.isError ? 'error' : ''}`.trim()}
-                style={{ backgroundColor: node.color }}
-              />
-            ))}
-            {Array.from({ length: chainPreview.ghostCount }).map((_, index) => (
-              <div key={`ghost-${index}`} className="chain-node ghost" />
-            ))}
-          </div>
-          <div className="chain-origin" aria-hidden="true" />
-        </section>
-
-        <div className="ribosome-shell">
-
-          {state.isPaused && <div className="paused-overlay">PAUSA</div>}
-
-          <div className="sites-row">
-            {renderSite('E', 'e', state.slots.e)}
-            {renderSite('P', 'p', state.slots.p)}
-            {renderSite('A', 'a', state.slots.a, true)}
-          </div>
-
-          <ToastStack toasts={state.toasts} />
-
-          <div className="mrna-track" aria-label="Flujo de ARNm 5 a 3">
-            <span className="mrna-end">5'</span>
-            <div className="mrna-strip" style={{ gridTemplateColumns: `repeat(${codonWindow.length || 1}, minmax(0, 1fr))` }}>
-              {codonWindow.map((entry) => (
-                <div
-                  key={`${entry.index}-${entry.codon || 'empty'}`}
-                  className={`mrna-codon ${entry.isActive ? 'active' : ''} ${entry.isEmpty ? 'empty' : ''}`.trim()}
-                >
-                  {entry.isEmpty ? <span className="mrna-empty">---</span> : renderCodon(entry.codon)}
-                </div>
-              ))}
-            </div>
-            <span className="mrna-end">3'</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="pool-section">
-        <h3>ARNt disponibles</h3>
-        <div className="trna-pool">
-          {state.trnaPool.map((card) => (
-            <article
-              key={card.id}
-              className="trna-card"
-              draggable
-              onDragStart={(event) => handleDragStart(event, card.id)}
-            >
-              <div className="trna-amino-top">
-                <span className="amino-dot" style={{ backgroundColor: card.color }} />
-                <span className="trna-amino-label">{card.name}</span>
-              </div>
-              <div className="trna-icon">ARNt</div>
-              <div className="trna-codon-label">{card.anticodon}</div>
-            </article>
-          ))}
-        </div>
-      </section>
+      <GameBoard
+        isPaused={state.isPaused}
+        chainPreview={chainPreview}
+        slots={state.slots}
+        trnaPool={state.trnaPool}
+        codonWindow={codonWindow}
+        renderCodon={renderCodon}
+        onDropCard={(cardId) => dispatch({ type: 'DROP_TRNA', cardId })}
+        toasts={state.toasts}
+      />
 
       {state.manualOpen && (
-        <ManualModal
-          title="Código Genético 🧬"
-          subtitle="Guía rápida de traducción y codones."
-          onClose={() => dispatch({ type: 'TOGGLE_MANUAL' })}
-        >
-
+        <ManualModal title="Código Genético 🧬" subtitle="Guía rápida de traducción y codones." onClose={() => dispatch({ type: 'TOGGLE_MANUAL' })}>
           <div className="manual-quickref">
             <span><strong>AUG</strong> → <strong>UAC</strong> → Met</span>
             <span><strong>STOP</strong> → UAA / UAG / UGA</span>
@@ -394,11 +221,7 @@ function App() {
       )}
 
       {state.gameGuideOpen && (
-        <ManualModal
-          title="¿Cómo Jugar?"
-          subtitle="Reglas y objetivo principal."
-          onClose={() => dispatch({ type: 'TOGGLE_GAME_GUIDE' })}
-        >
+        <ManualModal title="¿Cómo Jugar?" subtitle="Reglas y objetivo principal." onClose={() => dispatch({ type: 'TOGGLE_GAME_GUIDE' })}>
           <section className="manual-guide-body">
             <p><strong>Objetivo:</strong> completar la traduccion de la cadena hasta un codon STOP antes de que se agote el tiempo, con la menor cantidad de errores posible.</p>
             La dificultad afecta el tiempo disponible para traducir cada codon, la cantidad de ARNt's entre los disponibles, la ventana de codones entrantes.
@@ -411,96 +234,17 @@ function App() {
               <li>Objetivo: llegar al STOP antes del tiempo.</li>
             </ul>
           </section>
-          <p></p>
+          <p />
         </ManualModal>
       )}
 
       {state.levelResult && (
-        <div className="result-backdrop">
-          <section className={`result-sheet ${resultQualityClass}`.trim()}>
-            {state.levelResult.success && (
-              <div className="victory-burst" aria-hidden="true">
-                {Array.from({ length: 18 }).map((_, index) => (
-                  <span key={`burst-${index}`} style={{ '--i': index }} />
-                ))}
-              </div>
-            )}
-
-            <h2>Resultado del nivel</h2>
-
-            <div className="result-hero">
-              {state.levelResult.success ? (
-                <div className="victory-banner" aria-label="Victoria">
-                  <div className="victory-stars" aria-hidden="true">
-                    <span>★</span>
-                    <span>★</span>
-                    <span>★</span>
-                  </div>
-                  <div className="victory-ribbon">Victoria</div>
-                </div>
-              ) : (
-                <strong className="success-pill">Nivel fallido</strong>
-              )}
-
-              <span className={`quality-badge ${resultQualityClass}`.trim()}>
-                {capitalize(state.levelResult.quality)}
-              </span>
-            </div>
-
-            <p className="result-meta-title">Metadatos de traduccion</p>
-
-            <div className="result-grid">
-              <article>
-                <span>Longitud</span>
-                <strong>{state.levelResult.length}</strong>
-              </article>
-              <article>
-                <span>Errores</span>
-                <strong>{state.levelResult.errors}</strong>
-              </article>
-              <article>
-                <span>Tasa de error</span>
-                <strong>{(state.levelResult.errorRate * 100).toFixed(1)}%</strong>
-              </article>
-              <article>
-                <span>Calidad</span>
-                <strong>{capitalize(state.levelResult.quality)}</strong>
-              </article>
-              <article>
-                <span>Puntaje</span>
-                <strong>{formatNumber(state.levelResult.score)}</strong>
-              </article>
-              <article>
-                <span>Exito</span>
-                <strong>{state.levelResult.success ? 'Si' : 'No'}</strong>
-              </article>
-            </div>
-
-            <div className="result-chain" aria-label="Cadena final">
-              {state.chain.map((node, index) => (
-                <div
-                  key={`${node.aminoacid}-${index}`}
-                  className={`result-node ${node.isError ? 'error' : ''}`.trim()}
-                  style={{ backgroundColor: node.color }}
-                />
-              ))}
-            </div>
-
-            <div className="result-actions">
-              {state.levelResult.success ? (
-                <button type="button" className="btn primary" onClick={() => dispatch({ type: 'START_NEXT_LEVEL' })}>
-                  Siguiente nivel
-                </button>
-              ) : (
-                <button type="button" className="btn primary" onClick={() => dispatch({ type: 'START_GAME' })}>
-                  Reintentar
-                </button>
-              )}
-            </div>
-          </section>
-        </div>
+        <ResultModal
+          result={state.levelResult}
+          chain={state.chain}
+          onPrimaryAction={() => dispatch({ type: state.levelResult.success ? 'START_NEXT_LEVEL' : 'START_GAME' })}
+        />
       )}
-
     </main>
   )
 }

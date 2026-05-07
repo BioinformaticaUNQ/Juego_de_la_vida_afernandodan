@@ -1,0 +1,78 @@
+.codon-slot {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.codon-slot__container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.codon-slot__site {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(111, 126, 176, 0.3);
+  background: rgba(8, 12, 24, 0.4);
+  min-width: 160px;
+}
+
+.codon-slot__site--p {
+  border: 1px solid rgba(0, 224, 198, 0.4);
+  background: rgba(0, 224, 198, 0.08);
+}
+
+.codon-slot__site--a {
+  border: 1px solid rgba(135, 217, 102, 0.4);
+  background: rgba(135, 217, 102, 0.08);
+  border-style: dashed;
+}
+
+.codon-slot__label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: rgba(206, 214, 255, 0.9);
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+}
+
+.codon-slot__content {
+  width: 100%;
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.codon-slot__codon {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.15rem;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+}
+
+.codon-slot__instruction {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(206, 214, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.08rem;
+}
+
+.codon-slot__empty {
+  font-size: 0.75rem;
+  color: rgba(198, 191, 220, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+  font-weight: 500;
+}

@@ -64,7 +64,7 @@ export const DIFFICULTY_PROFILES = {
     missPenalty: 18,
     errorPenalty: 14,
     rejectRate: 0.8,
-    sequenceBaseLength: 18,
+    sequenceBaseLength: 7,
     chainGuideElements: 4,
   },
   normal: {
@@ -77,7 +77,7 @@ export const DIFFICULTY_PROFILES = {
     missPenalty: 24,
     errorPenalty: 18,
     rejectRate: 0.65,
-    sequenceBaseLength: 26,
+    sequenceBaseLength: 14,
     chainGuideElements: 3,
   },
   hard: {
@@ -90,7 +90,7 @@ export const DIFFICULTY_PROFILES = {
     missPenalty: 30,
     errorPenalty: 22,
     rejectRate: 0.5,
-    sequenceBaseLength: 34,
+    sequenceBaseLength: 21,
     chainGuideElements: 2,
   },
 }
@@ -112,15 +112,7 @@ export const BASE_COLORS = {
   C: '#3fa7ff',
 }
 
-export const getQualityByErrorRate = (errorRate) => {
-  if (errorRate === 0) {
-    return 'perfecta'
-  }
-  if (errorRate <= 0.1) {
-    return 'funcional'
-  }
-  if (errorRate <= 0.3) {
-    return 'defectuosa'
-  }
-  return 'degradada'
+export const getQualityByErrorRate = (errorRate, threshold = 0.15) => {
+  // Retorna 'valida' si los errores están bajo el umbral, 'truncada' si no
+  return errorRate <= threshold ? 'valida' : 'truncada'
 }

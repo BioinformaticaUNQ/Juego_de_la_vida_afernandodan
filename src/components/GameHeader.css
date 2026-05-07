@@ -1,0 +1,188 @@
+.game-header {
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 280px);
+  gap: 14px;
+}
+
+.game-header__timer-card,
+.game-header__score-card {
+  border: 1px solid rgba(109, 123, 176, 0.36);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(13, 18, 36, 0.94), rgba(10, 14, 29, 0.96));
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.32), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.game-header__timer-card {
+  padding: 16px;
+}
+
+.game-header__topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-header__eyebrow {
+  display: block;
+  color: rgba(206, 214, 255, 0.72);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.game-header__topline strong {
+  display: inline-block;
+  margin-top: 2px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.game-header__difficulty-pill {
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(0, 224, 198, 0.14);
+  color: #96fff4;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+}
+
+.game-header__bar {
+  margin-top: 10px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(94, 108, 162, 0.55);
+  background: rgba(9, 12, 24, 0.92);
+  overflow: hidden;
+}
+
+.game-header__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #32e28d, #ffd54f);
+  transition: width 120ms linear;
+}
+
+.game-header__fill.is-warn {
+  background: linear-gradient(90deg, #ffd54f, #ff9745);
+}
+
+.game-header__fill.is-danger {
+  background: linear-gradient(90deg, #ff7f66, #ff6b6b);
+}
+
+.game-header__controls {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.game-header__controls label {
+  color: rgba(206, 214, 255, 0.7);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.game-header__controls select {
+  min-width: 250px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(109, 123, 176, 0.58);
+  background: rgba(14, 20, 39, 0.95);
+  color: #f6f3ff;
+  padding: 0 10px;
+}
+
+.game-btn {
+  border: 1px solid rgba(120, 137, 189, 0.6);
+  border-radius: 10px;
+  background: rgba(20, 28, 53, 0.95);
+  color: #f6f3ff;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: transform 100ms ease, filter 120ms ease, border-color 120ms ease;
+}
+
+.game-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.game-btn--primary {
+  border-color: rgba(0, 224, 198, 0.8);
+  background: linear-gradient(180deg, #13d7c0, #0c9e90);
+  color: #021c1a;
+}
+
+.game-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.game-header__score-card {
+  padding: 16px;
+  text-align: right;
+}
+
+.game-header__level-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(134, 248, 231, 0.18);
+  color: #c5fff6;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+}
+
+.game-header__score-card h2 {
+  margin: 6px 0 0;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: #ffd54f;
+}
+
+.game-header__score-card strong {
+  display: block;
+  margin-top: 2px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 4.4vw, 58px);
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.game-header__score-card p {
+  margin: 2px 0;
+  color: #87d966;
+  font-weight: 700;
+}
+
+.game-header__score-card small {
+  color: rgba(206, 214, 255, 0.72);
+}
+
+@media (max-width: 960px) {
+  .game-header {
+    grid-template-columns: 1fr;
+  }
+
+  .game-header__score-card {
+    text-align: left;
+  }
+
+  .game-header__controls select {
+    min-width: 0;
+    width: 100%;
+  }
+}

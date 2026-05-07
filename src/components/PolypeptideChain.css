@@ -1,0 +1,58 @@
+.polypeptide-chain {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  min-height: 3.8rem;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 224, 198, 0.3) transparent;
+  scroll-behavior: smooth;
+}
+
+.polypeptide-chain::-webkit-scrollbar {
+  height: 4px;
+}
+
+.polypeptide-chain::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.polypeptide-chain::-webkit-scrollbar-thumb {
+  background: rgba(0, 224, 198, 0.3);
+  border-radius: 2px;
+}
+
+.polypeptide-chain__residue {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.polypeptide-chain__letter {
+  font-size: 1rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.95);
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-family: 'Bebas Neue', monospace;
+}
+
+.polypeptide-chain__residue.is-error {
+  box-shadow: 0 0 0 0.2rem rgba(255, 102, 102, 0.55);
+}
+
+.polypeptide-chain__residue:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 2px rgba(0, 224, 198, 0.6);
+}

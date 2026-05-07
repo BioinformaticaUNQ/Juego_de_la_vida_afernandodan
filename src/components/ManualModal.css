@@ -1,0 +1,68 @@
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.67);
+  display: grid;
+  place-items: center;
+  z-index: 30;
+  padding: 12px;
+  overflow: auto;
+}
+
+.modal-shell__panel {
+  width: min(1100px, 96vw);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 20px;
+  border: 1px solid rgba(123, 137, 191, 0.28);
+  background: linear-gradient(180deg, rgba(12, 18, 36, 0.98), rgba(8, 12, 22, 0.98));
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  padding: 18px;
+}
+
+.modal-shell__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.modal-shell__eyebrow {
+  margin: 0 0 4px;
+  color: rgba(206, 214, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
+}
+
+.modal-shell__header h2 {
+  margin: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  letter-spacing: 1px;
+}
+
+.modal-shell__header p {
+  margin: 4px 0 0;
+  color: rgba(198, 191, 220, 0.9);
+}
+
+.modal-shell__close {
+  border: 1px solid rgba(120, 137, 189, 0.6);
+  border-radius: 10px;
+  background: rgba(20, 28, 53, 0.95);
+  color: #f6f3ff;
+  font-weight: 700;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.modal-shell__body {
+  margin-top: 16px;
+}
+
+@media (max-width: 700px) {
+  .modal-shell__header {
+    flex-direction: column;
+  }
+}
